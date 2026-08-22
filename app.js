@@ -24,9 +24,10 @@ const S = {
   sets: DB.ler("sets", {}),
   pesos: DB.ler("pesos", {}),
   hist: DB.ler("hist", []),
-  corridas: DB.ler("corridas", [])
+  corridas: DB.ler("corridas", []),
+  medidas: DB.ler("medidas", [])
 };
-const salvar = () => { DB.gravar("sets", S.sets); DB.gravar("pesos", S.pesos); DB.gravar("hist", S.hist); DB.gravar("corridas", S.corridas); DB.gravar("plano", S.plano); };
+const salvar = () => { DB.gravar("sets", S.sets); DB.gravar("pesos", S.pesos); DB.gravar("hist", S.hist); DB.gravar("corridas", S.corridas); DB.gravar("medidas", S.medidas); DB.gravar("plano", S.plano); };
 
 /* ── utilidades ─────────────────────────────────────────── */
 const $ = s => document.querySelector(s);
@@ -174,6 +175,7 @@ function render() {
   app.innerHTML = "";
   if (S.aba === "treinos") S.treino ? telaTreino() : telaInicio();
   if (S.aba === "corrida") telaCorrida();
+  if (S.aba === "medidas") telaMedidas();
   if (S.aba === "progresso") telaProgresso();
   if (S.aba === "ajustes") telaAjustes();
   nav();
@@ -399,7 +401,7 @@ function telaAjustes() {
 
   const exp = el("button", "linha", "Salvar backup dos dados");
   exp.onclick = () => {
-    const blob = new Blob([JSON.stringify({ sets: S.sets, pesos: S.pesos, hist: S.hist, corridas: S.corridas }, null, 1)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify({ sets: S.sets, pesos: S.pesos, hist: S.hist, corridas: S.corridas, medidas: S.medidas }, null, 1)], { type: "application/json" });
     const a = el("a"); a.href = URL.createObjectURL(blob); a.download = "treino-isa-backup.json"; a.click();
   };
   const imp = el("button", "linha", "Restaurar backup");
@@ -410,7 +412,7 @@ function telaAjustes() {
       fr.onload = () => {
         try {
           const o = JSON.parse(fr.result);
-          Object.assign(S, { sets: o.sets || {}, pesos: o.pesos || {}, hist: o.hist || [], corridas: o.corridas || [] });
+          Object.assign(S, { sets: o.sets || {}, pesos: o.pesos || {}, hist: o.hist || [], corridas: o.corridas || [], medidas: o.medidas || [] });
           salvar(); render(); aviso("Backup restaurado");
         } catch (e) { aviso("Arquivo inválido"); }
       };
@@ -422,8 +424,8 @@ function telaAjustes() {
   zerar.onclick = () => { S.sets = {}; salvar(); render(); aviso("Séries zeradas"); };
   const apagar = el("button", "linha perigo", "Apagar todo o histórico");
   apagar.onclick = () => {
-    if (confirm("Apagar histórico de força, corridas, pesos e marcações? Não dá para desfazer.")) {
-      DB.limpar(); Object.assign(S, { sets: {}, pesos: {}, hist: [], corridas: [] }); salvar(); render(); aviso("Tudo apagado");
+    if (confirm("Apagar histórico de força, corridas, medidas, pesos e marcações? Não dá para desfazer.")) {
+      DB.limpar(); Object.assign(S, { sets: {}, pesos: {}, hist: [], corridas: [], medidas: [] }); salvar(); render(); aviso("Tudo apagado");
     }
   };
   app.append(exp, imp, zerar, apagar);
@@ -433,7 +435,7 @@ function telaAjustes() {
 /* ── navegação ──────────────────────────────────────────── */
 function nav() {
   const n = el("nav"), inner = el("div", "in");
-  [["treinos", "Força"], ["corrida", "Corrida"], ["progresso", "Progresso"], ["ajustes", "Ajustes"]].forEach(([k, r]) => {
+  [["treinos", "Força"], ["corrida", "Corrida"], ["medidas", "Medidas"], ["progresso", "Progresso"], ["ajustes", "Ajustes"]].forEach(([k, r]) => {
     const b = el("button", "", r);
     b.setAttribute("aria-selected", S.aba === k);
     b.onclick = () => { S.aba = k; S.treino = null; if (k !== "corrida") S.sessao = null; pararDescanso(); render(); };
