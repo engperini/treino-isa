@@ -1,5 +1,7 @@
 # Treino da Isa 🏋️‍♀️🏃‍♀️
 
+🌐 **[Read this in English](README.en.md)**
+
 App de treino pessoal, feito para uso **100% offline** no celular. Reúne
 musculação (academia e casa, foco em glúteos), corrida (plano de 4 semanas) e
 acompanhamento opcional de peso e medidas — sem servidor, sem conta, sem
