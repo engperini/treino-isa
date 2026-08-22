@@ -72,7 +72,32 @@ const UI = {
     apagar_conf: "Apagar histórico de força, corridas, medidas, pesos e marcações? Não dá para desfazer.",
     series_zeradas: "Séries zeradas", tudo_apagado: "Tudo apagado", backup_restaurado: "Backup restaurado",
     arquivo_invalido: "Arquivo inválido",
-    ajustes_rodape: "Tudo fica salvo no próprio celular. Funciona sem internet.<br>Faça um backup de vez em quando."
+    ajustes_rodape: "Tudo fica salvo no próprio celular. Funciona sem internet.<br>Faça um backup de vez em quando.",
+
+    editar_treino: "Editar séries e repetições", reps_lbl: "Repetições",
+    salvar_alteracoes: "Salvar alterações", alteracoes_salvas: "Alterações salvas",
+    add_exercicio: "Adicionar exercício", escolher_exercicio: "Escolher exercício",
+    add_treino: "Criar treino personalizado", nome_treino_lbl: "Nome do treino",
+    nome_treino_ph: "Ex: Peito e tríceps", foco_treino_lbl: "Foco (opcional)",
+    foco_treino_ph: "Ex: Peito, ombro e tríceps", cor_lbl: "Cor",
+    criar: "Criar treino", preencha_nome: "Dê um nome ao treino",
+    excluir_treino: "Excluir este treino", excluir_treino_conf: "Excluir este treino personalizado? Os exercícios dele somem junto.",
+    treino_excluido: "Treino excluído", excluir_exercicio_conf: "Remover este exercício do treino?",
+    remover: "Remover", dica_ph: "Dica de execução (opcional)", adicionar: "Adicionar",
+    exercicio_adicionado: "Exercício adicionado",
+    ver_evolucao: "Ver evolução de carga", sem_evolucao: "Registre a carga em pelo menos 2 treinos concluídos para ver a evolução aqui.",
+    editar_sessao: "Editar sessão", excluir_sessao: "Excluir sessão", corrida_excluir_sessao_conf: "Excluir esta sessão personalizada?",
+    dia_lbl: "Dia", dia_ph: "Ex: Quarta", tipo_lbl: "Tipo", tipo_ph: "Ex: Fartlek",
+    nome_sessao_lbl: "Nome da sessão", nome_sessao_ph: "Ex: Corrida leve",
+    desc_lbl: "Descrição", desc_ph: "Ex: 5 km em ritmo confortável",
+    salvar: "Salvar", corrida_personalizadas: "Sessões personalizadas", corrida_nova_sessao: "Nova sessão personalizada",
+    editar_previsao: "Editar sessão",
+    altura_lbl: "Altura", altura_un: "cm", imc_lbl: "IMC", imc_abaixo: "abaixo do peso", imc_normal: "peso normal",
+    imc_sobrepeso: "sobrepeso", imc_obesidade: "obesidade",
+    definir_metas: "Definir metas",
+    meta_treinos_lbl: "Treinos por semana", meta_km_lbl: "Corrida por semana (km)",
+    meta_treinos_prog: "{{f}} de {{m}} treinos esta semana",
+    meta_km_prog: "{{f}} de {{m}} km esta semana"
   },
 
   en: {
@@ -131,7 +156,32 @@ const UI = {
     apagar_conf: "Delete strength, running, and measurement history, weights and checkmarks? This can't be undone.",
     series_zeradas: "Sets reset", tudo_apagado: "Everything deleted", backup_restaurado: "Backup restored",
     arquivo_invalido: "Invalid file",
-    ajustes_rodape: "Everything stays on this phone. Works without internet.<br>Make a backup every now and then."
+    ajustes_rodape: "Everything stays on this phone. Works without internet.<br>Make a backup every now and then.",
+
+    editar_treino: "Edit sets and reps", reps_lbl: "Reps",
+    salvar_alteracoes: "Save changes", alteracoes_salvas: "Changes saved",
+    add_exercicio: "Add exercise", escolher_exercicio: "Choose exercise",
+    add_treino: "Create custom workout", nome_treino_lbl: "Workout name",
+    nome_treino_ph: "E.g.: Chest and triceps", foco_treino_lbl: "Focus (optional)",
+    foco_treino_ph: "E.g.: Chest, shoulders and triceps", cor_lbl: "Color",
+    criar: "Create workout", preencha_nome: "Give the workout a name",
+    excluir_treino: "Delete this workout", excluir_treino_conf: "Delete this custom workout? Its exercises go with it.",
+    treino_excluido: "Workout deleted", excluir_exercicio_conf: "Remove this exercise from the workout?",
+    remover: "Remove", dica_ph: "Execution tip (optional)", adicionar: "Add",
+    exercicio_adicionado: "Exercise added",
+    ver_evolucao: "See load history", sem_evolucao: "Log the load in at least 2 completed workouts to see the history here.",
+    editar_sessao: "Edit session", excluir_sessao: "Delete session", corrida_excluir_sessao_conf: "Delete this custom session?",
+    dia_lbl: "Day", dia_ph: "E.g.: Wednesday", tipo_lbl: "Type", tipo_ph: "E.g.: Fartlek",
+    nome_sessao_lbl: "Session name", nome_sessao_ph: "E.g.: Easy run",
+    desc_lbl: "Description", desc_ph: "E.g.: 5 km at a comfortable pace",
+    salvar: "Save", corrida_personalizadas: "Custom sessions", corrida_nova_sessao: "New custom session",
+    editar_previsao: "Edit session",
+    altura_lbl: "Height", altura_un: "cm", imc_lbl: "BMI", imc_abaixo: "underweight", imc_normal: "normal weight",
+    imc_sobrepeso: "overweight", imc_obesidade: "obesity",
+    definir_metas: "Set goals",
+    meta_treinos_lbl: "Workouts per week", meta_km_lbl: "Running per week (km)",
+    meta_treinos_prog: "{{f}} of {{m}} workouts this week",
+    meta_km_prog: "{{f}} of {{m}} km this week"
   },
 
   es: {
@@ -190,7 +240,32 @@ const UI = {
     apagar_conf: "¿Borrar historial de fuerza, carreras, medidas, pesos y marcas? No se puede deshacer.",
     series_zeradas: "Series reiniciadas", tudo_apagado: "Todo borrado", backup_restaurado: "Copia restaurada",
     arquivo_invalido: "Archivo inválido",
-    ajustes_rodape: "Todo se guarda en este celular. Funciona sin internet.<br>Haz una copia de seguridad de vez en cuando."
+    ajustes_rodape: "Todo se guarda en este celular. Funciona sin internet.<br>Haz una copia de seguridad de vez en cuando.",
+
+    editar_treino: "Editar series y repeticiones", reps_lbl: "Repeticiones",
+    salvar_alteracoes: "Guardar cambios", alteracoes_salvas: "Cambios guardados",
+    add_exercicio: "Agregar ejercicio", escolher_exercicio: "Elegir ejercicio",
+    add_treino: "Crear entrenamiento personalizado", nome_treino_lbl: "Nombre del entrenamiento",
+    nome_treino_ph: "Ej: Pecho y tríceps", foco_treino_lbl: "Enfoque (opcional)",
+    foco_treino_ph: "Ej: Pecho, hombro y tríceps", cor_lbl: "Color",
+    criar: "Crear entrenamiento", preencha_nome: "Dale un nombre al entrenamiento",
+    excluir_treino: "Eliminar este entrenamiento", excluir_treino_conf: "¿Eliminar este entrenamiento personalizado? Sus ejercicios se eliminan también.",
+    treino_excluido: "Entrenamiento eliminado", excluir_exercicio_conf: "¿Quitar este ejercicio del entrenamiento?",
+    remover: "Quitar", dica_ph: "Consejo de ejecución (opcional)", adicionar: "Agregar",
+    exercicio_adicionado: "Ejercicio agregado",
+    ver_evolucao: "Ver evolución de carga", sem_evolucao: "Registra la carga en al menos 2 entrenamientos completados para ver la evolución aquí.",
+    editar_sessao: "Editar sesión", excluir_sessao: "Eliminar sesión", corrida_excluir_sessao_conf: "¿Eliminar esta sesión personalizada?",
+    dia_lbl: "Día", dia_ph: "Ej: Miércoles", tipo_lbl: "Tipo", tipo_ph: "Ej: Fartlek",
+    nome_sessao_lbl: "Nombre de la sesión", nome_sessao_ph: "Ej: Carrera suave",
+    desc_lbl: "Descripción", desc_ph: "Ej: 5 km a ritmo cómodo",
+    salvar: "Guardar", corrida_personalizadas: "Sesiones personalizadas", corrida_nova_sessao: "Nueva sesión personalizada",
+    editar_previsao: "Editar sesión",
+    altura_lbl: "Altura", altura_un: "cm", imc_lbl: "IMC", imc_abaixo: "bajo peso", imc_normal: "peso normal",
+    imc_sobrepeso: "sobrepeso", imc_obesidade: "obesidad",
+    definir_metas: "Definir metas",
+    meta_treinos_lbl: "Entrenamientos por semana", meta_km_lbl: "Carrera por semana (km)",
+    meta_treinos_prog: "{{f}} de {{m}} entrenamientos esta semana",
+    meta_km_prog: "{{f}} de {{m}} km esta semana"
   }
 };
 
@@ -316,6 +391,8 @@ CONTEUDO.en = {
 
   "Peso": "Weight", "Cintura": "Waist", "Quadril": "Hips", "Busto": "Bust/Chest",
   "Braço direito": "Right arm", "Braço esquerdo": "Left arm", "Coxa direita": "Right thigh", "Coxa esquerda": "Left thigh",
+  "Panturrilha direita": "Right calf", "Panturrilha esquerda": "Left calf",
+  "Antebraço direito": "Right forearm", "Antebraço esquerdo": "Left forearm", "Gordura corporal": "Body fat",
 
   "Superior": "Upper body", "Inferior": "Lower body", "Bumbum": "Glutes",
   "Peito, costas e ombros": "Chest, back and shoulders", "Quadríceps e abdômen": "Quads and abs",
@@ -436,6 +513,8 @@ CONTEUDO.es = {
 
   "Peso": "Peso", "Cintura": "Cintura", "Quadril": "Cadera", "Busto": "Busto/Pecho",
   "Braço direito": "Brazo derecho", "Braço esquerdo": "Brazo izquierdo", "Coxa direita": "Muslo derecho", "Coxa esquerda": "Muslo izquierdo",
+  "Panturrilha direita": "Pantorrilla derecha", "Panturrilha esquerda": "Pantorrilla izquierda",
+  "Antebraço direito": "Antebrazo derecho", "Antebraço esquerdo": "Antebrazo izquierdo", "Gordura corporal": "Grasa corporal",
 
   "Superior": "Tren superior", "Inferior": "Tren inferior", "Bumbum": "Glúteos",
   "Peito, costas e ombros": "Pecho, espalda y hombros", "Quadríceps e abdômen": "Cuádriceps y abdomen",

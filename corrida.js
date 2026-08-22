@@ -64,8 +64,13 @@ const CORRIDA = {
   ]
 };
 
-const todasSessoes = () => CORRIDA.semanas.flatMap(s => s.sessoes);
-const achaSessao = id => todasSessoes().find(s => s.id === id);
+const todasSessoes = () => [...CORRIDA.semanas.flatMap(s => s.sessoes), ...S.corridaCustom];
+const achaSessao = id => {
+  const base = todasSessoes().find(s => s.id === id);
+  if (!base) return null;
+  const ov = S.corridaOverrides[id];
+  return ov ? Object.assign({}, base, ov) : base;
+};
 const mmss = seg => `${Math.floor(seg / 60)}:${String(Math.round(seg % 60)).padStart(2, "0")}`;
 const paraSeg = txt => {
   const p = String(txt).split(":").map(Number);
@@ -94,28 +99,41 @@ function telaCorrida() {
   for (const sem of CORRIDA.semanas) {
     app.append(el("div", "eyebrow semtit", tt("corrida_rotina_lbl", { n: sem.n })));
     for (const s of sem.sessoes) {
-      const regs = corridasDe(s.id), ok = regs.length > 0;
-      const c = el("button", "card corr i-" + s.blocos[0].i, `
-        <div class="letra">${tx(s.dia).slice(0, 3).toUpperCase()}</div>
-        <div style="flex:1;min-width:0">
-          <h3>${tx(s.nome)}</h3>
-          <p>${tx(s.desc)}</p>
-          <div class="chips">
-            <span class="chip reps">${s.km} km</span>
-            <span class="chip">${s.tempo} ${tt("previsto")}</span>
-            <span class="chip alvo">PSE ${s.pse}</span>
-          </div>
-        </div>
-        ${ok ? `<div class="tick">✓ ${pace(regs.at(-1).km, regs.at(-1).seg)}/km</div>` : ""}`);
-      c.onclick = () => { S.sessao = s.id; render(); };
-      app.append(c);
+      app.append(cardSessaoCorrida(achaSessao(s.id)));
     }
   }
+
+  if (S.corridaCustom.length) {
+    app.append(el("div", "eyebrow semtit", tt("corrida_personalizadas")));
+    S.corridaCustom.forEach(s => app.append(cardSessaoCorrida(s)));
+  }
+
+  const addBtn = el("button", "linha", tt("corrida_nova_sessao"));
+  addBtn.onclick = () => formSessaoCorrida();
+  app.append(addBtn);
 
   const g = el("div", "log guia");
   g.append(el("div", "eyebrow", tt("pse_titulo")));
   CORRIDA.pse.forEach(([e, z, d]) => g.append(el("div", "row pse", `<div><b>${tx(z)}</b><br><small>${tx(d)}</small></div><span class="chip reps">${e}</span>`)));
   app.append(g);
+}
+
+function cardSessaoCorrida(s) {
+  const regs = corridasDe(s.id), ok = regs.length > 0;
+  const c = el("button", "card corr i-" + s.blocos[0].i, `
+    <div class="letra">${tx(s.dia).slice(0, 3).toUpperCase()}</div>
+    <div style="flex:1;min-width:0">
+      <h3>${tx(s.nome)}</h3>
+      <p>${tx(s.desc)}</p>
+      <div class="chips">
+        <span class="chip reps">${s.km} km</span>
+        <span class="chip">${s.tempo} ${tt("previsto")}</span>
+        <span class="chip alvo">PSE ${s.pse}</span>
+      </div>
+    </div>
+    ${ok ? `<div class="tick">✓ ${pace(regs.at(-1).km, regs.at(-1).seg)}/km</div>` : ""}`);
+  c.onclick = () => { S.sessao = s.id; render(); };
+  return c;
 }
 
 /* ── detalhe da sessão ──────────────────────────────────── */
@@ -124,6 +142,9 @@ function telaSessao() {
   const sub = el("div", "subhead");
   const back = el("button", "back", "←"); back.onclick = () => { S.sessao = null; render(); };
   sub.append(back, el("div", "", `<div class="eyebrow">${tx(s.dia)} · ${tx(s.tipo)}</div><h2>${tx(s.nome)}</h2>`));
+  const editBtn = el("button", "back", "✎"); editBtn.style.marginLeft = "auto"; editBtn.title = tt("editar_previsao");
+  editBtn.onclick = () => formSessaoCorrida(s);
+  sub.append(editBtn);
   app.append(sub);
 
   app.append(el("div", "log", `

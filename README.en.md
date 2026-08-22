@@ -46,6 +46,14 @@ an iPhone.
 - Set-by-set checking, with **automatic rest** between them (a timer that
   vibrates when it ends, on Android).
 - A load field (kg) per exercise, saved for the next session.
+- **Edit sets and reps** for any exercise (✎ button on the workout) — the
+  original plan is never changed, only your preference is saved on top of it.
+- **Load history with a chart**: after 2 completed workouts with a logged
+  weight, a "See load history" button appears in the exercise animation.
+- **Create a custom workout from scratch** ("+" card on the home screen),
+  picking exercises from the existing animation catalog.
+- All of this is 100% optional — if you just want to open the app and
+  follow the original plan, you never have to touch any of it.
 
 **Running**
 - A 4-week plan with fartlek, intervals, tempo runs, a pyramid, long runs
@@ -54,17 +62,24 @@ an iPhone.
   a preview of the next block, vibration on the switch.
 - Logging distance, time and perceived effort (RPE 1–10), with
   **pace calculated automatically**.
+- **Custom sessions**: create your own runs beyond the 4-week plan, or edit
+  the target (km, time, RPE) of any existing session.
 
 **Measurements** *(optional)*
 - Free-form logging of weight and body measurements (waist, hips, bust,
-  arms, thighs) — fill in only what you want in each entry.
+  arms, thighs, calves, forearms, body fat %) — fill in only what you want
+  in each entry.
 - **Automatic comparison** between the first and the latest measurement.
 - A simple chart of weight over time.
+- **BMI calculated automatically** from weight and height (height is saved
+  once, in the same form as the name).
 - Full history, with the option to delete individual entries.
 
 **General**
 - Progress tab: day streak, workouts this week, history, total km and
   average pace.
+- **Personal goals**: set how many workouts per week or how many running km
+  per week you want to hit, tracked with a progress bar.
 - Backup and restore via a `.json` file (includes strength, running and
   measurements).
 - Installable as a **PWA** — works without internet after the first time
@@ -124,6 +139,7 @@ just a quick shortcut for testing or sharing.
 ├── poses.js        # animation engine: SVG poses for each exercise
 ├── corrida.js      # running plan (weeks, blocks, RPE)
 ├── medidas.js      # weight and body measurements (logging, chart, history)
+├── extras.js       # custom workouts/exercises, goals, BMI, custom running sessions
 ├── app.js          # app logic, screens, navigation and local storage
 ├── manifest.json   # PWA metadata
 ├── sw.js           # service worker (offline cache)

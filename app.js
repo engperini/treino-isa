@@ -13,7 +13,7 @@ const DB = {
     mem[k] = v;
     try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* modo memória */ }
   },
-  limpar() { mem.sets = mem.pesos = mem.hist = mem.corridas = mem.medidas = mem.idioma = mem.perfil = undefined; try { localStorage.clear(); } catch (e) {} }
+  limpar() { mem.sets = mem.pesos = mem.hist = mem.corridas = mem.medidas = mem.idioma = mem.perfil = mem.overrides = mem.custom = mem.cargaHist = mem.corridaCustom = mem.corridaOverrides = mem.metas = undefined; try { localStorage.clear(); } catch (e) {} }
 };
 
 const S = {
@@ -27,9 +27,22 @@ const S = {
   pesos: DB.ler("pesos", {}),
   hist: DB.ler("hist", []),
   corridas: DB.ler("corridas", []),
-  medidas: DB.ler("medidas", [])
+  medidas: DB.ler("medidas", []),
+  overrides: DB.ler("overrides", {}),
+  custom: DB.ler("custom", { ACADEMIA: [], CASA: [] }),
+  cargaHist: DB.ler("cargaHist", []),
+  corridaCustom: DB.ler("corridaCustom", []),
+  corridaOverrides: DB.ler("corridaOverrides", {}),
+  metas: DB.ler("metas", {})
 };
-const salvar = () => { DB.gravar("sets", S.sets); DB.gravar("pesos", S.pesos); DB.gravar("hist", S.hist); DB.gravar("corridas", S.corridas); DB.gravar("medidas", S.medidas); DB.gravar("plano", S.plano); DB.gravar("idioma", S.idioma); DB.gravar("perfil", S.perfil); };
+const salvar = () => {
+  DB.gravar("sets", S.sets); DB.gravar("pesos", S.pesos); DB.gravar("hist", S.hist);
+  DB.gravar("corridas", S.corridas); DB.gravar("medidas", S.medidas); DB.gravar("plano", S.plano);
+  DB.gravar("idioma", S.idioma); DB.gravar("perfil", S.perfil); DB.gravar("overrides", S.overrides);
+  DB.gravar("custom", S.custom); DB.gravar("cargaHist", S.cargaHist);
+  DB.gravar("corridaCustom", S.corridaCustom); DB.gravar("corridaOverrides", S.corridaOverrides);
+  DB.gravar("metas", S.metas);
+};
 if (typeof migrarMedidas === "function") migrarMedidas();
 
 /* ── utilidades ─────────────────────────────────────────── */
@@ -37,11 +50,11 @@ const $ = s => document.querySelector(s);
 const el = (t, c, h) => { const n = document.createElement(t); if (c) n.className = c; if (h != null) n.innerHTML = h; return n; };
 const dia = d => new Date(d).toISOString().slice(0, 10);
 const hoje = () => dia(Date.now());
-const treinosDoPlano = () => PLANO[S.plano].treinos;
-const achaTreino = id => [...PLANO.ACADEMIA.treinos, ...PLANO.CASA.treinos].find(t => t.id === id);
+const treinosDoPlano = () => [...PLANO[S.plano].treinos, ...S.custom[S.plano]];
+const achaTreino = id => [...PLANO.ACADEMIA.treinos, ...PLANO.CASA.treinos, ...S.custom.ACADEMIA, ...S.custom.CASA].find(t => t.id === id);
 const chave = (tid, i) => tid + "|" + i;
 const feitos = t => t.ex.reduce((n, ex, i) => n + (S.sets[chave(t.id, i)] || []).filter(Boolean).length, 0);
-const totalSets = t => t.ex.reduce((n, ex) => n + ex.s, 0);
+const totalSets = t => t.ex.reduce((n, ex, i) => n + setsDe(t, i, ex), 0);
 const vibrar = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
 
 function aviso(txt) {
@@ -232,6 +245,10 @@ function telaInicio() {
     c.onclick = () => { S.treino = t.id; render(); };
     grid.append(c);
   }
+  const addCard = el("button", "card card-add");
+  addCard.innerHTML = `<div class="letra">+</div><div style="flex:1"><h3>${tt("add_treino")}</h3></div>`;
+  addCard.onclick = () => formNovoTreino();
+  grid.append(addCard);
   app.append(grid);
   app.append(el("p", "vazio", tt("dica_home")));
 }
@@ -247,6 +264,9 @@ function telaTreino() {
   const sub = el("div", "subhead");
   const back = el("button", "back", "←"); back.onclick = () => { S.treino = null; pararDescanso(); render(); };
   sub.append(back, el("div", "", `<div class="eyebrow">${tt("treino_letra", { letra: t.letra, plano: S.plano === "ACADEMIA" ? tt("academia") : tt("casa") })}</div><h2>${tx(t.nome)}</h2>`));
+  const editBtn = el("button", "back", "✎"); editBtn.style.marginLeft = "auto"; editBtn.title = tt("editar_treino");
+  editBtn.onclick = () => formEditarTreino(t);
+  sub.append(editBtn);
   app.append(sub);
 
   const f = feitos(t), tot = totalSets(t);
@@ -268,38 +288,40 @@ function telaTreino() {
 
 function cardExercicio(t, ex, i) {
   const k = chave(t.id, i);
-  const marc = S.sets[k] || (S.sets[k] = new Array(ex.s).fill(false));
+  const nSets = setsDe(t, i, ex), nReps = repsDe(t, i, ex);
+  const marc = (S.sets[k] && S.sets[k].length === nSets) ? S.sets[k] : (S.sets[k] = new Array(nSets).fill(false));
   const done = marc.every(Boolean);
   const c = el("div", "ex" + (done ? " done" : ""));
 
   const head = el("div", "head");
   const thumb = el("button", "thumb");
   thumb.append(fazSvg(ex.art, false));
-  thumb.onclick = () => modal(ex);
+  thumb.onclick = () => modal(ex, k, nSets, nReps);
   const info = el("div", "", `
     <h4>${tx(ex.n)}</h4>
     ${ex.eq ? `<p class="eq">${tx(ex.eq)}</p>` : ""}
     <div class="chips">
-      <span class="chip reps">${ex.s} × ${ex.r}</span>
-      <span class="chip alvo">${tx(ex.alvo)}</span>
+      <span class="chip reps">${nSets} × ${nReps}</span>
+      ${ex.alvo ? `<span class="chip alvo">${tx(ex.alvo)}</span>` : ""}
     </div>`);
   info.style.flex = "1"; info.style.minWidth = "0";
   head.append(thumb, info);
-  c.append(head, el("p", "dica", tx(ex.d)));
+  c.append(head);
+  if (ex.d) c.append(el("p", "dica", tx(ex.d)));
 
   const sets = el("div", "sets", `<span class="lbl">${tt("series_label")}</span>`);
-  for (let s = 0; s < ex.s; s++) {
+  for (let s = 0; s < nSets; s++) {
     const b = el("button", "dot", String(s + 1));
     b.dataset.on = marc[s] ? "1" : "0";
     b.onclick = () => {
       marc[s] = !marc[s]; salvar(); vibrar(18);
-      if (marc[s] && s < ex.s - 1) descanso(ex.tempo && ex.tempo > 120 ? 90 : 60);
+      if (marc[s] && s < nSets - 1) descanso(ex.tempo && ex.tempo > 120 ? 90 : 60);
       render();
       requestAnimationFrame(() => document.querySelectorAll(".ex")[i]?.scrollIntoView({ block: "center", behavior: "smooth" }));
     };
     sets.append(b);
   }
-  const peso = el("div", "peso", `<input inputmode="decimal" placeholder="—" value="${S.pesos[k] ?? ""}"><span>kg</span>`);
+  const peso = el("div", "peso", `<input inputmode="decimal" placeholder="—" value="${S.pesos[k] ?? ""}"><span>${tt("kg")}</span>`);
   const inp = peso.querySelector("input");
   inp.onchange = () => { S.pesos[k] = inp.value.trim(); salvar(); };
   sets.append(peso);
@@ -310,17 +332,18 @@ function cardExercicio(t, ex, i) {
 function concluir(t) {
   const f = feitos(t);
   S.hist.push({ ts: Date.now(), id: t.id, plano: S.plano, letra: t.letra, treinoNome: t.nome, sets: f, tot: totalSets(t) });
-  t.ex.forEach((ex, i) => S.sets[chave(t.id, i)] = new Array(ex.s).fill(false));
+  registrarCargaConcluida(t);
+  t.ex.forEach((ex, i) => S.sets[chave(t.id, i)] = new Array(setsDe(t, i, ex)).fill(false));
   salvar(); pararDescanso(); vibrar([120, 60, 120]);
   S.treino = null; render();
   aviso(tt("treino_concluido", { letra: t.letra, n: f }));
 }
 
 /* ── modal ──────────────────────────────────────────────── */
-function modal(ex) {
+function modal(ex, chaveEx, nSets, nReps) {
   const sh = el("div", "sheet");
   const box = el("div", "box", `<div class="grab"></div>
-    <div class="eyebrow">${tx(ex.alvo)}</div>
+    ${ex.alvo ? `<div class="eyebrow">${tx(ex.alvo)}</div>` : ""}
     <h2 style="margin:4px 0 14px;font-size:21px;letter-spacing:-.03em">${tx(ex.n)}</h2>`);
   const palco = el("div", "palco");
   const svg = fazSvg(ex.art, true);
@@ -345,14 +368,33 @@ function modal(ex) {
   box.append(ctrl);
 
   box.append(el("div", "log", `
-    <div class="row"><small>${tt("series_reps")}</small><b>${ex.s} × ${ex.r}</b></div>
+    <div class="row"><small>${tt("series_reps")}</small><b>${nSets ?? ex.s} × ${nReps ?? ex.r}</b></div>
     ${ex.eq ? `<div class="row"><small>${tt("equipamento")}</small><b>${tx(ex.eq)}</b></div>` : ""}
-    <div class="row"><small>${tt("foco")}</small><b>${tx(ex.alvo)}</b></div>`));
-  box.append(el("p", "dica", tx(ex.d)));
+    ${ex.alvo ? `<div class="row"><small>${tt("foco")}</small><b>${tx(ex.alvo)}</b></div>` : ""}`));
+  if (ex.d) box.append(el("p", "dica", tx(ex.d)));
+
+  if (chaveEx) {
+    const hist = historicoDe(chaveEx);
+    if (hist.length >= 2) {
+      const btnEvol = el("button", "linha", tt("ver_evolucao"));
+      btnEvol.style.marginTop = "10px";
+      let aberto = false;
+      btnEvol.onclick = () => {
+        aberto = !aberto;
+        box.querySelectorAll(".grafico-carga").forEach(g => g.remove());
+        if (aberto) {
+          const g = grafico(hist.map(h => h.peso), hist.map(h => fmtData(h.ts)));
+          g.classList.add("grafico-carga");
+          btnEvol.after(g);
+        }
+      };
+      box.append(btnEvol);
+    }
+  }
 
   if (ex.tempo) {
     const b = el("button", "linha", tt("cronometrar", { t: ex.tempo >= 60 ? Math.round(ex.tempo / 60) + " min" : ex.tempo + " seg" }));
-    b.style.marginTop = "14px";
+    b.style.marginTop = "10px";
     b.onclick = () => { descanso(ex.tempo); fechar(); };
     box.append(b);
   }
@@ -385,6 +427,28 @@ function telaProgresso() {
     <div class="stat"><b>${sequencia()}</b><span>${tt("sequencia")}</span></div>
     <div class="stat"><b>${semana}</b><span>${tt("na_semana")}</span></div>
     <div class="stat"><b>${S.hist.length}</b><span>${tt("treinos")}</span></div>`));
+
+  if (S.metas.treinos || S.metas.km) {
+    const kmSemana = S.corridas.filter(c => Date.now() - c.ts < 7 * 864e5).reduce((n, c) => n + c.km, 0);
+    const metasBox = el("div", "log");
+    metasBox.style.marginBottom = "14px";
+    if (S.metas.treinos) {
+      const pct = Math.min(100, Math.round(semana / S.metas.treinos * 100));
+      metasBox.append(el("div", "row-meta", `
+        <div class="row"><small>${tt("meta_treinos_prog", { f: semana, m: S.metas.treinos })}</small></div>
+        <div class="bar"><i style="width:${pct}%"></i></div>`));
+    }
+    if (S.metas.km) {
+      const pct = Math.min(100, Math.round(kmSemana / S.metas.km * 100));
+      metasBox.append(el("div", "row-meta", `
+        <div class="row"><small>${tt("meta_km_prog", { f: kmSemana.toFixed(1), m: S.metas.km })}</small></div>
+        <div class="bar"><i style="width:${pct}%"></i></div>`));
+    }
+    app.append(metasBox);
+  }
+  const metasBtn = el("button", "linha", tt("definir_metas"));
+  metasBtn.onclick = () => formMetas();
+  app.append(metasBtn);
 
   const dias = new Set(S.hist.map(h => dia(h.ts)));
   const heat = el("div", "heat");
@@ -428,7 +492,11 @@ function telaAjustes() {
 
   const exp = el("button", "linha", tt("salvar_backup"));
   exp.onclick = () => {
-    const blob = new Blob([JSON.stringify({ sets: S.sets, pesos: S.pesos, hist: S.hist, corridas: S.corridas, medidas: S.medidas, perfil: S.perfil, idioma: S.idioma }, null, 1)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify({
+      sets: S.sets, pesos: S.pesos, hist: S.hist, corridas: S.corridas, medidas: S.medidas,
+      perfil: S.perfil, idioma: S.idioma, overrides: S.overrides, custom: S.custom,
+      cargaHist: S.cargaHist, corridaCustom: S.corridaCustom, corridaOverrides: S.corridaOverrides, metas: S.metas
+    }, null, 1)], { type: "application/json" });
     const a = el("a"); a.href = URL.createObjectURL(blob); a.download = "treino-backup.json"; a.click();
   };
   const imp = el("button", "linha", tt("restaurar_backup"));
@@ -439,7 +507,13 @@ function telaAjustes() {
       fr.onload = () => {
         try {
           const o = JSON.parse(fr.result);
-          Object.assign(S, { sets: o.sets || {}, pesos: o.pesos || {}, hist: o.hist || [], corridas: o.corridas || [], medidas: o.medidas || [], perfil: o.perfil || {}, idioma: o.idioma || S.idioma });
+          Object.assign(S, {
+            sets: o.sets || {}, pesos: o.pesos || {}, hist: o.hist || [], corridas: o.corridas || [],
+            medidas: o.medidas || [], perfil: o.perfil || {}, idioma: o.idioma || S.idioma,
+            overrides: o.overrides || {}, custom: o.custom || { ACADEMIA: [], CASA: [] },
+            cargaHist: o.cargaHist || [], corridaCustom: o.corridaCustom || [],
+            corridaOverrides: o.corridaOverrides || {}, metas: o.metas || {}
+          });
           salvar(); render(); aviso(tt("backup_restaurado"));
         } catch (e) { aviso(tt("arquivo_invalido")); }
       };
@@ -452,7 +526,12 @@ function telaAjustes() {
   const apagar = el("button", "linha perigo", tt("apagar_tudo"));
   apagar.onclick = () => {
     if (confirm(tt("apagar_conf"))) {
-      DB.limpar(); Object.assign(S, { sets: {}, pesos: {}, hist: [], corridas: [], medidas: [] }); salvar(); render(); aviso(tt("tudo_apagado"));
+      DB.limpar();
+      Object.assign(S, {
+        sets: {}, pesos: {}, hist: [], corridas: [], medidas: [], overrides: {},
+        custom: { ACADEMIA: [], CASA: [] }, cargaHist: [], corridaCustom: [], corridaOverrides: {}, metas: {}
+      });
+      salvar(); render(); aviso(tt("tudo_apagado"));
     }
   };
   app.append(exp, imp, zerar, apagar);

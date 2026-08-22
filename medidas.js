@@ -11,7 +11,12 @@ const CAMPOS_MEDIDA = [
   { k: "braco_dir", nome: "Braço direito", un: "cm" },
   { k: "braco_esq", nome: "Braço esquerdo", un: "cm" },
   { k: "coxa_dir", nome: "Coxa direita", un: "cm" },
-  { k: "coxa_esq", nome: "Coxa esquerda", un: "cm" }
+  { k: "coxa_esq", nome: "Coxa esquerda", un: "cm" },
+  { k: "panturrilha_dir", nome: "Panturrilha direita", un: "cm" },
+  { k: "panturrilha_esq", nome: "Panturrilha esquerda", un: "cm" },
+  { k: "antebraco_dir", nome: "Antebraço direito", un: "cm" },
+  { k: "antebraco_esq", nome: "Antebraço esquerdo", un: "cm" },
+  { k: "gordura", nome: "Gordura corporal", un: "%" }
 ];
 
 /* Registros antigos guardavam "braco" e "coxa" como medida única.
@@ -47,6 +52,12 @@ function telaMedidas() {
   app.append(registrar);
 
   const primeira = regs[0], ultima = regs[regs.length - 1];
+  if (S.perfil.altura && ultima.peso) {
+    const imc = calculaImc(ultima.peso, S.perfil.altura);
+    if (imc) {
+      app.append(el("div", "log imc-box", `<div class="row"><div><b>${tt("imc_lbl")}</b><br><small>${imc.categoria}</small></div><span class="chip reps">${imc.valor.toFixed(1)}</span></div>`));
+    }
+  }
   if (regs.length > 1) {
     app.append(el("div", "eyebrow semtit", tt("desde", { d: fmtData(primeira.ts) })));
     const comp = el("div", "log");
@@ -119,7 +130,9 @@ function formMedida() {
   nomeBox.innerHTML = `
     <div class="eyebrow">${tt("nome_titulo")}</div>
     <input id="f-nome" class="nome-input" placeholder="${tt("nome_ph")}" value="${S.perfil.nome || ""}">
-    <p class="vazio" style="padding:6px 0 0;text-align:left">${tt("nome_ajuda")}</p>`;
+    <p class="vazio" style="padding:6px 0 0;text-align:left">${tt("nome_ajuda")}</p>
+    <label style="display:block;margin-top:12px">${tt("altura_lbl")} <span>${tt("altura_un")}</span>
+      <input id="f-altura" inputmode="numeric" placeholder="—" value="${S.perfil.altura || ""}"></label>`;
   box.append(nomeBox);
 
   let artigoSel = S.perfil.artigo || "de";
@@ -142,10 +155,12 @@ function formMedida() {
   }
   const salvarNome = () => {
     const nome = box.querySelector("#f-nome").value.trim();
-    S.perfil = { nome, artigo: artigoSel };
+    const altura = parseFloat(String(box.querySelector("#f-altura").value).replace(",", "."));
+    S.perfil = { nome, artigo: artigoSel, altura: altura > 0 ? altura : S.perfil.altura };
     salvar();
   };
   box.querySelector("#f-nome").onchange = salvarNome;
+  box.querySelector("#f-altura").onchange = salvarNome;
 
   const grid = el("div", "campos grid2");
   CAMPOS_MEDIDA.forEach(c => {

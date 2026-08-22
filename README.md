@@ -45,6 +45,14 @@ para quem usa iPhone vale mais o hábito de usar o backup em **Ajustes**.
 - Marcação de série por série, com **descanso automático** entre elas
   (cronômetro com vibração no final, no Android).
 - Campo de carga (kg) por exercício, salvo para a próxima sessão.
+- **Editar séries e repetições** de qualquer exercício (botão ✎ no treino) —
+  o plano original nunca é alterado, só a sua preferência fica salva por cima.
+- **Histórico de carga com gráfico**: depois de 2 treinos concluídos com peso
+  registrado, um botão "Ver evolução" aparece na animação do exercício.
+- **Criar treino personalizado do zero** (card "+" na tela inicial), com
+  exercícios escolhidos do catálogo de animações já existente.
+- Tudo isso é 100% opcional — quem só quer abrir o app e seguir o plano
+  original não precisa tocar em nada disso.
 
 **Corrida**
 - Plano de 4 semanas com fartlek, tiros, tempo run, pirâmide, longões e
@@ -53,17 +61,25 @@ para quem usa iPhone vale mais o hábito de usar o backup em **Ajustes**.
   prévia do próximo bloco, vibração na virada.
 - Registro de distância, tempo e percepção de esforço (PSE 1–10), com
   **pace calculado automaticamente**.
+- **Sessões personalizadas**: crie corridas próprias além do plano de 4
+  semanas, ou edite a previsão (km, tempo, PSE) de qualquer sessão existente.
 
 **Medidas** *(opcional)*
 - Cadastro livre de peso e medidas corporais (cintura, quadril, busto, braço,
-  coxa) — preenche só o que quiser em cada registro.
+  coxa, panturrilha, antebraço, % de gordura) — preenche só o que quiser em
+  cada registro.
 - **Comparação automática** entre a primeira e a última medição.
 - Gráfico simples da evolução do peso ao longo do tempo.
+- **IMC calculado automaticamente** a partir de peso e altura (a altura fica
+  salva uma vez, no mesmo formulário do nome).
 - Histórico completo, com opção de excluir registros individuais.
 
 **Geral**
 - Aba de Progresso: sequência de dias, treinos da semana, histórico,
   km totais e pace médio.
+- **Metas pessoais**: defina quantos treinos por semana ou quantos km de
+  corrida por semana você quer alcançar, e acompanhe com uma barra de
+  progresso.
 - Backup e restauração em arquivo `.json` (inclui força, corrida e medidas).
 - Instalável como **PWA** — funciona sem internet depois da primeira abertura.
 - **Três idiomas**: Português, English e Español, com seletor na aba Ajustes.
@@ -120,6 +136,7 @@ prático para testar ou compartilhar rapidamente.
 ├── poses.js        # motor de animação: poses SVG de cada exercício
 ├── corrida.js      # plano de corrida (semanas, blocos, PSE)
 ├── medidas.js      # peso e medidas corporais (cadastro, gráfico, histórico)
+├── extras.js       # treinos/exercícios personalizados, metas, IMC, corrida personalizada
 ├── app.js          # lógica do app, telas, navegação e armazenamento local
 ├── manifest.json   # metadados do PWA
 ├── sw.js           # service worker (cache offline)
