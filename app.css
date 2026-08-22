@@ -266,3 +266,10 @@ nav button[aria-selected="true"]{background:var(--ink3);color:var(--txt)}
 .grafico-eixo,.grafico-minmax{display:flex;justify-content:space-between;font-size:10.5px;color:var(--mut);font-weight:700}
 .grafico-eixo{margin-top:6px}
 .grafico-minmax{margin-top:2px;opacity:.7}
+
+/* ── nome do usuário (dentro do formulário de medidas) ──── */
+.nome-box{margin-bottom:4px}
+.nome-input{
+  width:100%;margin-top:8px;background:var(--ink3);border:1px solid var(--line);border-radius:13px;color:var(--txt);
+  padding:13px 12px;font-size:16px;font-weight:700;font-family:inherit;-webkit-user-select:text;user-select:text
+}

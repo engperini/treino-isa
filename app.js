@@ -13,10 +13,12 @@ const DB = {
     mem[k] = v;
     try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* modo memória */ }
   },
-  limpar() { mem.sets = mem.pesos = mem.hist = undefined; try { localStorage.clear(); } catch (e) {} }
+  limpar() { mem.sets = mem.pesos = mem.hist = mem.corridas = mem.medidas = mem.idioma = mem.perfil = undefined; try { localStorage.clear(); } catch (e) {} }
 };
 
 const S = {
+  idioma: DB.ler("idioma", "pt"),
+  perfil: DB.ler("perfil", {}),
   plano: DB.ler("plano", "ACADEMIA"),
   aba: "treinos",
   treino: null,
@@ -27,7 +29,7 @@ const S = {
   corridas: DB.ler("corridas", []),
   medidas: DB.ler("medidas", [])
 };
-const salvar = () => { DB.gravar("sets", S.sets); DB.gravar("pesos", S.pesos); DB.gravar("hist", S.hist); DB.gravar("corridas", S.corridas); DB.gravar("medidas", S.medidas); DB.gravar("plano", S.plano); };
+const salvar = () => { DB.gravar("sets", S.sets); DB.gravar("pesos", S.pesos); DB.gravar("hist", S.hist); DB.gravar("corridas", S.corridas); DB.gravar("medidas", S.medidas); DB.gravar("plano", S.plano); DB.gravar("idioma", S.idioma); DB.gravar("perfil", S.perfil); };
 if (typeof migrarMedidas === "function") migrarMedidas();
 
 /* ── utilidades ─────────────────────────────────────────── */
@@ -149,7 +151,7 @@ function descanso(seg) {
   pararDescanso();
   let resta = seg;
   const box = el("div", "timer", `<div class="t"></div><div class="rail"><i style="width:100%"></i></div>
-    <button data-mais>+15s</button><button data-fecha>Pular</button>`);
+    <button data-mais>${tt("mais15")}</button><button data-fecha>${tt("pular")}</button>`);
   document.body.appendChild(box);
   const mostra = () => {
     box.querySelector(".t").textContent = `${Math.floor(resta / 60)}:${String(resta % 60).padStart(2, "0")}`;
@@ -160,7 +162,7 @@ function descanso(seg) {
   box.querySelector("[data-fecha]").onclick = pararDescanso;
   tmr = { box, id: setInterval(() => {
     resta--;
-    if (resta <= 0) { vibrar([180, 90, 180]); aviso("Descanso terminado. Bora!"); pararDescanso(); return; }
+    if (resta <= 0) { vibrar([180, 90, 180]); aviso(tt("descanso_terminado")); pararDescanso(); return; }
     mostra();
   }, 1000) };
 }
@@ -184,17 +186,28 @@ function render() {
 }
 
 /* ── início ─────────────────────────────────────────────── */
+function tituloApp() {
+  const nome = (S.perfil.nome || "").trim();
+  if (!nome) return tt("titulo_generico");
+  if (S.idioma === "pt") {
+    const artigo = S.perfil.artigo || "de";
+    const rot = artigo === "da" ? tt("artigo_a") : artigo === "do" ? tt("artigo_o") : tt("artigo_neutro");
+    return `${rot} <span>${nome}</span>`;
+  }
+  return tt("titulo_de", { nome }).replace(nome, `<span>${nome}</span>`);
+}
+
 function telaInicio() {
   const h = new Date().getHours();
-  const saudacao = h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
+  const saudacao = h < 12 ? tt("saud_manha") : h < 18 ? tt("saud_tarde") : tt("saud_noite");
   const top = el("header", "top", `
-    <div class="hello"><div class="eyebrow">${saudacao}</div><h1>Treino da <span>Isa</span></h1></div>
-    <div class="streak">🔥 ${sequencia()}<small>dias</small></div>`);
+    <div class="hello"><div class="eyebrow">${saudacao}</div><h1>${tituloApp()}</h1></div>
+    <div class="streak">🔥 ${sequencia()}<small>${tt("dias_streak")}</small></div>`);
   app.append(top);
 
   const seg = el("div", "seg");
   for (const k of ["ACADEMIA", "CASA"]) {
-    const b = el("button", "", PLANO[k].label);
+    const b = el("button", "", k === "ACADEMIA" ? tt("academia") : tt("casa"));
     b.setAttribute("aria-selected", S.plano === k);
     b.onclick = () => { S.plano = k; salvar(); render(); };
     seg.append(b);
@@ -208,11 +221,11 @@ function telaInicio() {
     const c = el("button", "card c-" + t.cor, `
       <div class="letra">${t.letra}</div>
       <div style="flex:1;min-width:0">
-        <h3>${t.nome}</h3>
-        <p>${t.foco}</p>
+        <h3>${tx(t.nome)}</h3>
+        <p>${tx(t.foco)}</p>
         <div class="meta">
           <div class="bar"><i style="width:${pct}%"></i></div>
-          <div class="pct">${f}/${tot} séries</div>
+          <div class="pct">${f}/${tot} ${tt("series")}</div>
         </div>
       </div>
       ${ultima ? `<div class="tick">${quandoFoi(ultima.ts)}</div>` : ""}`);
@@ -220,12 +233,12 @@ function telaInicio() {
     grid.append(c);
   }
   app.append(grid);
-  app.append(el("p", "vazio", "Toque em um treino para começar. As séries ficam salvas mesmo sem internet."));
+  app.append(el("p", "vazio", tt("dica_home")));
 }
 
 function quandoFoi(ts) {
   const d = Math.round((Date.now() - ts) / 864e5);
-  return d <= 0 ? "hoje" : d === 1 ? "ontem" : `há ${d}d`;
+  return d <= 0 ? tt("hoje") : d === 1 ? tt("ontem") : tt("ha_dias", { n: d });
 }
 
 /* ── treino ─────────────────────────────────────────────── */
@@ -233,13 +246,13 @@ function telaTreino() {
   const t = achaTreino(S.treino);
   const sub = el("div", "subhead");
   const back = el("button", "back", "←"); back.onclick = () => { S.treino = null; pararDescanso(); render(); };
-  sub.append(back, el("div", "", `<div class="eyebrow">Treino ${t.letra} · ${PLANO[S.plano].label}</div><h2>${t.nome}</h2>`));
+  sub.append(back, el("div", "", `<div class="eyebrow">${tt("treino_letra", { letra: t.letra, plano: S.plano === "ACADEMIA" ? tt("academia") : tt("casa") })}</div><h2>${tx(t.nome)}</h2>`));
   app.append(sub);
 
   const f = feitos(t), tot = totalSets(t);
   const painel = el("div", "progresso", `
     <div class="row">
-      <div class="n">${f}<small> / ${tot} séries</small></div>
+      <div class="n">${f}<small> / ${tot} ${tt("series")}</small></div>
       <div class="pct">${Math.round(f / tot * 100)}%</div>
     </div>
     <div class="bar" style="margin-top:11px"><i style="width:${f / tot * 100}%"></i></div>`);
@@ -247,7 +260,7 @@ function telaTreino() {
 
   t.ex.forEach((ex, i) => app.append(cardExercicio(t, ex, i)));
 
-  const fim = el("button", "fim", f ? "Concluir treino" : "Marque uma série para começar");
+  const fim = el("button", "fim", f ? tt("concluir_treino") : tt("marque_serie"));
   fim.disabled = !f;
   fim.onclick = () => concluir(t);
   app.append(fim);
@@ -264,17 +277,17 @@ function cardExercicio(t, ex, i) {
   thumb.append(fazSvg(ex.art, false));
   thumb.onclick = () => modal(ex);
   const info = el("div", "", `
-    <h4>${ex.n}</h4>
-    ${ex.eq ? `<p class="eq">${ex.eq}</p>` : ""}
+    <h4>${tx(ex.n)}</h4>
+    ${ex.eq ? `<p class="eq">${tx(ex.eq)}</p>` : ""}
     <div class="chips">
       <span class="chip reps">${ex.s} × ${ex.r}</span>
-      <span class="chip alvo">${ex.alvo}</span>
+      <span class="chip alvo">${tx(ex.alvo)}</span>
     </div>`);
   info.style.flex = "1"; info.style.minWidth = "0";
   head.append(thumb, info);
-  c.append(head, el("p", "dica", ex.d));
+  c.append(head, el("p", "dica", tx(ex.d)));
 
-  const sets = el("div", "sets", `<span class="lbl">Séries</span>`);
+  const sets = el("div", "sets", `<span class="lbl">${tt("series_label")}</span>`);
   for (let s = 0; s < ex.s; s++) {
     const b = el("button", "dot", String(s + 1));
     b.dataset.on = marc[s] ? "1" : "0";
@@ -296,30 +309,30 @@ function cardExercicio(t, ex, i) {
 
 function concluir(t) {
   const f = feitos(t);
-  S.hist.push({ ts: Date.now(), id: t.id, plano: S.plano, nome: `Treino ${t.letra} · ${t.nome}`, sets: f, tot: totalSets(t) });
+  S.hist.push({ ts: Date.now(), id: t.id, plano: S.plano, letra: t.letra, treinoNome: t.nome, sets: f, tot: totalSets(t) });
   t.ex.forEach((ex, i) => S.sets[chave(t.id, i)] = new Array(ex.s).fill(false));
   salvar(); pararDescanso(); vibrar([120, 60, 120]);
   S.treino = null; render();
-  aviso(`Treino ${t.letra} concluído. ${f} séries 💪`);
+  aviso(tt("treino_concluido", { letra: t.letra, n: f }));
 }
 
 /* ── modal ──────────────────────────────────────────────── */
 function modal(ex) {
   const sh = el("div", "sheet");
   const box = el("div", "box", `<div class="grab"></div>
-    <div class="eyebrow">${ex.alvo}</div>
-    <h2 style="margin:4px 0 14px;font-size:21px;letter-spacing:-.03em">${ex.n}</h2>`);
+    <div class="eyebrow">${tx(ex.alvo)}</div>
+    <h2 style="margin:4px 0 14px;font-size:21px;letter-spacing:-.03em">${tx(ex.n)}</h2>`);
   const palco = el("div", "palco");
   const svg = fazSvg(ex.art, true);
   palco.append(svg);
   box.append(palco);
 
   const ctrl = el("div", "ctrl");
-  const bLento = el("button", "", "Câmera lenta");
-  const bPausa = el("button", "", "Pausar");
+  const bLento = el("button", "", tt("camera_lenta"));
+  const bPausa = el("button", "", tt("pausar"));
   let lento = false, pausado = false;
   bLento.onclick = () => { lento = !lento; bLento.classList.toggle("on", lento); refaz(); };
-  bPausa.onclick = () => { pausado = !pausado; bPausa.textContent = pausado ? "Animar" : "Pausar"; bPausa.classList.toggle("on", pausado); refaz(); };
+  bPausa.onclick = () => { pausado = !pausado; bPausa.textContent = pausado ? tt("animar") : tt("pausar"); bPausa.classList.toggle("on", pausado); refaz(); };
   function refaz() {
     pararAnims();
     const orig = ARTES[ex.art].ritmo || 2400;
@@ -332,18 +345,18 @@ function modal(ex) {
   box.append(ctrl);
 
   box.append(el("div", "log", `
-    <div class="row"><small>Séries e repetições</small><b>${ex.s} × ${ex.r}</b></div>
-    ${ex.eq ? `<div class="row"><small>Equipamento</small><b>${ex.eq}</b></div>` : ""}
-    <div class="row"><small>Foco</small><b>${ex.alvo}</b></div>`));
-  box.append(el("p", "dica", ex.d));
+    <div class="row"><small>${tt("series_reps")}</small><b>${ex.s} × ${ex.r}</b></div>
+    ${ex.eq ? `<div class="row"><small>${tt("equipamento")}</small><b>${tx(ex.eq)}</b></div>` : ""}
+    <div class="row"><small>${tt("foco")}</small><b>${tx(ex.alvo)}</b></div>`));
+  box.append(el("p", "dica", tx(ex.d)));
 
   if (ex.tempo) {
-    const b = el("button", "linha", `Cronometrar ${ex.tempo >= 60 ? Math.round(ex.tempo / 60) + " min" : ex.tempo + " seg"}`);
+    const b = el("button", "linha", tt("cronometrar", { t: ex.tempo >= 60 ? Math.round(ex.tempo / 60) + " min" : ex.tempo + " seg" }));
     b.style.marginTop = "14px";
     b.onclick = () => { descanso(ex.tempo); fechar(); };
     box.append(b);
   }
-  const fecharBtn = el("button", "linha", "Fechar");
+  const fecharBtn = el("button", "linha", tt("fechar"));
   fecharBtn.style.marginTop = "8px";
   fecharBtn.onclick = () => fechar();
   box.append(fecharBtn);
@@ -365,14 +378,13 @@ function sequencia() {
 }
 
 function telaProgresso() {
-  app.append(el("header", "top", `<div class="hello"><div class="eyebrow">Seu histórico</div><h1>Progresso</h1></div>`));
+  app.append(el("header", "top", `<div class="hello"><div class="eyebrow">${tt("prog_titulo")}</div><h1>${tt("nav_progresso")}</h1></div>`));
 
   const semana = S.hist.filter(h => Date.now() - h.ts < 7 * 864e5).length;
-  const sets = S.hist.reduce((n, h) => n + h.sets, 0);
   app.append(el("div", "stats", `
-    <div class="stat"><b>${sequencia()}</b><span>sequência</span></div>
-    <div class="stat"><b>${semana}</b><span>na semana</span></div>
-    <div class="stat"><b>${S.hist.length}</b><span>treinos</span></div>`));
+    <div class="stat"><b>${sequencia()}</b><span>${tt("sequencia")}</span></div>
+    <div class="stat"><b>${semana}</b><span>${tt("na_semana")}</span></div>
+    <div class="stat"><b>${S.hist.length}</b><span>${tt("treinos")}</span></div>`));
 
   const dias = new Set(S.hist.map(h => dia(h.ts)));
   const heat = el("div", "heat");
@@ -381,15 +393,19 @@ function telaProgresso() {
     const c = el("i"); if (dias.has(dia(d))) c.classList.add("on");
     c.title = dia(d); heat.append(c);
   }
-  app.append(el("div", "eyebrow", "Últimos 14 dias"), heat);
+  app.append(el("div", "eyebrow", tt("ultimos14")), heat);
 
-  if (!S.hist.length) app.append(el("p", "vazio", "Nenhum treino de força registrado ainda."));
+  if (!S.hist.length) app.append(el("p", "vazio", tt("sem_treinos_forca")));
 
   const log = el("div", "log");
   log.style.marginTop = "18px";
   S.hist.slice(-8).reverse().forEach(h => {
     const d = new Date(h.ts);
-    log.append(el("div", "row", `<div><b>${h.nome}</b><br><small>${PLANO[h.plano].label} · ${h.sets}/${h.tot} séries</small></div>
+    const titulo = h.treinoNome != null
+      ? tt("treino_letra", { letra: h.letra, plano: tx(h.treinoNome) })
+      : h.nome; // registros antigos, salvos antes do multi-idioma
+    const planoLbl = h.plano === "ACADEMIA" ? tt("academia") : tt("casa");
+    log.append(el("div", "row", `<div><b>${titulo}</b><br><small>${planoLbl} · ${h.sets}/${h.tot} ${tt("series")}</small></div>
       <small>${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}</small>`));
   });
   if (S.hist.length) app.append(log);
@@ -398,14 +414,24 @@ function telaProgresso() {
 
 /* ── ajustes ────────────────────────────────────────────── */
 function telaAjustes() {
-  app.append(el("header", "top", `<div class="hello"><div class="eyebrow">App da Isa</div><h1>Ajustes</h1></div>`));
+  app.append(el("header", "top", `<div class="hello"><div class="eyebrow">${tt("app_isa")}</div><h1>${tt("ajustes_titulo")}</h1></div>`));
 
-  const exp = el("button", "linha", "Salvar backup dos dados");
+  app.append(el("div", "eyebrow semtit", tt("idioma_titulo")));
+  const segIdioma = el("div", "seg");
+  IDIOMAS.forEach(id => {
+    const b = el("button", "", id.nome);
+    b.setAttribute("aria-selected", S.idioma === id.c);
+    b.onclick = () => { S.idioma = id.c; salvar(); render(); };
+    segIdioma.append(b);
+  });
+  app.append(segIdioma);
+
+  const exp = el("button", "linha", tt("salvar_backup"));
   exp.onclick = () => {
-    const blob = new Blob([JSON.stringify({ sets: S.sets, pesos: S.pesos, hist: S.hist, corridas: S.corridas, medidas: S.medidas }, null, 1)], { type: "application/json" });
-    const a = el("a"); a.href = URL.createObjectURL(blob); a.download = "treino-isa-backup.json"; a.click();
+    const blob = new Blob([JSON.stringify({ sets: S.sets, pesos: S.pesos, hist: S.hist, corridas: S.corridas, medidas: S.medidas, perfil: S.perfil, idioma: S.idioma }, null, 1)], { type: "application/json" });
+    const a = el("a"); a.href = URL.createObjectURL(blob); a.download = "treino-backup.json"; a.click();
   };
-  const imp = el("button", "linha", "Restaurar backup");
+  const imp = el("button", "linha", tt("restaurar_backup"));
   imp.onclick = () => {
     const i = el("input"); i.type = "file"; i.accept = ".json";
     i.onchange = () => {
@@ -413,30 +439,30 @@ function telaAjustes() {
       fr.onload = () => {
         try {
           const o = JSON.parse(fr.result);
-          Object.assign(S, { sets: o.sets || {}, pesos: o.pesos || {}, hist: o.hist || [], corridas: o.corridas || [], medidas: o.medidas || [] });
-          salvar(); render(); aviso("Backup restaurado");
-        } catch (e) { aviso("Arquivo inválido"); }
+          Object.assign(S, { sets: o.sets || {}, pesos: o.pesos || {}, hist: o.hist || [], corridas: o.corridas || [], medidas: o.medidas || [], perfil: o.perfil || {}, idioma: o.idioma || S.idioma });
+          salvar(); render(); aviso(tt("backup_restaurado"));
+        } catch (e) { aviso(tt("arquivo_invalido")); }
       };
       fr.readAsText(i.files[0]);
     };
     i.click();
   };
-  const zerar = el("button", "linha", "Zerar séries marcadas");
-  zerar.onclick = () => { S.sets = {}; salvar(); render(); aviso("Séries zeradas"); };
-  const apagar = el("button", "linha perigo", "Apagar todo o histórico");
+  const zerar = el("button", "linha", tt("zerar_series"));
+  zerar.onclick = () => { S.sets = {}; salvar(); render(); aviso(tt("series_zeradas")); };
+  const apagar = el("button", "linha perigo", tt("apagar_tudo"));
   apagar.onclick = () => {
-    if (confirm("Apagar histórico de força, corridas, medidas, pesos e marcações? Não dá para desfazer.")) {
-      DB.limpar(); Object.assign(S, { sets: {}, pesos: {}, hist: [], corridas: [], medidas: [] }); salvar(); render(); aviso("Tudo apagado");
+    if (confirm(tt("apagar_conf"))) {
+      DB.limpar(); Object.assign(S, { sets: {}, pesos: {}, hist: [], corridas: [], medidas: [] }); salvar(); render(); aviso(tt("tudo_apagado"));
     }
   };
   app.append(exp, imp, zerar, apagar);
-  app.append(el("p", "vazio", "Tudo fica salvo no próprio celular. Funciona sem internet.<br>Faça um backup de vez em quando."));
+  app.append(el("p", "vazio", tt("ajustes_rodape")));
 }
 
 /* ── navegação ──────────────────────────────────────────── */
 function nav() {
   const n = el("nav"), inner = el("div", "in");
-  [["treinos", "Força"], ["corrida", "Corrida"], ["medidas", "Medidas"], ["progresso", "Progresso"], ["ajustes", "Ajustes"]].forEach(([k, r]) => {
+  [["treinos", tt("nav_forca")], ["corrida", tt("nav_corrida")], ["medidas", tt("nav_medidas")], ["progresso", tt("nav_progresso")], ["ajustes", tt("nav_ajustes")]].forEach(([k, r]) => {
     const b = el("button", "", r);
     b.setAttribute("aria-selected", S.aba === k);
     b.onclick = () => { S.aba = k; S.treino = null; if (k !== "corrida") S.sessao = null; pararDescanso(); render(); };

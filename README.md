@@ -64,6 +64,13 @@ para quem usa iPhone vale mais o hábito de usar o backup em **Ajustes**.
   km totais e pace médio.
 - Backup e restauração em arquivo `.json` (inclui força, corrida e medidas).
 - Instalável como **PWA** — funciona sem internet depois da primeira abertura.
+- **Três idiomas**: Português, English e Español, com seletor na aba Ajustes.
+  Todo o conteúdo (nomes de exercícios, dicas, plano de corrida) é traduzido,
+  não só os menus.
+- **Nome personalizável**: ao cadastrar uma medição, dá para informar o nome
+  de quem está usando o app — a partir daí a tela inicial passa a mostrar
+  "Treino da/do {nome}" (ou o equivalente no idioma escolhido). É opcional;
+  sem nome, o app mostra um título genérico.
 
 ## Para desenvolvedores
 
@@ -103,6 +110,7 @@ prático para testar ou compartilhar rapidamente.
 ```
 ├── index.html      # marcação da página
 ├── app.css         # todo o estilo visual
+├── i18n.js         # traduções (PT/EN/ES) — interface e conteúdo
 ├── data.js         # plano de força (exercícios, séries, dicas)
 ├── poses.js        # motor de animação: poses SVG de cada exercício
 ├── corrida.js      # plano de corrida (semanas, blocos, PSE)
@@ -128,6 +136,11 @@ puro — o `build.py` é só um utilitário opcional.
   ```
 - **Mudar campos de medidas**: edite `CAMPOS_MEDIDA` em `medidas.js` — cada
   item vira automaticamente um campo no formulário e uma linha na comparação.
+- **Adicionar ou revisar traduções**: edite `i18n.js`. `UI` guarda os textos
+  fixos da interface (menus, botões); `CONTEUDO` traduz textos de conteúdo
+  (nomes de exercícios, dicas) usando o português original como chave — um
+  texto sem tradução cadastrada simplesmente aparece em português, sem
+  quebrar o app.
 - **Nova animação de exercício**: adicione uma entrada em `ARTES` (`poses.js`)
   com duas poses (`a` e `b`) — o app interpola entre elas.
 - **Cores e tipografia**: variáveis no topo de `app.css` (`:root`).

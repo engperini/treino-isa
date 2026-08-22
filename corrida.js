@@ -80,29 +80,29 @@ function telaCorrida() {
 
   const feitas = S.corridas.length, km = S.corridas.reduce((n, c) => n + c.km, 0);
   app.append(el("header", "top", `
-    <div class="hello"><div class="eyebrow">${CORRIDA.rotina}</div><h1>Corrida</h1></div>
+    <div class="hello"><div class="eyebrow">${tx(CORRIDA.rotina)}</div><h1>${tt("nav_corrida")}</h1></div>
     <div class="streak">👟 ${km.toFixed(1)}<small>km</small></div>`));
 
   const totalSes = todasSessoes().length;
   app.append(el("div", "progresso", `
     <div class="row">
-      <div class="n">${feitas}<small> / ${totalSes} treinos do plano</small></div>
+      <div class="n">${feitas}<small> / ${totalSes} ${tt("treinos_do_plano")}</small></div>
       <div class="pct">${Math.round(feitas / totalSes * 100)}%</div>
     </div>
     <div class="bar" style="margin-top:11px"><i style="width:${Math.min(100, feitas / totalSes * 100)}%"></i></div>`));
 
   for (const sem of CORRIDA.semanas) {
-    app.append(el("div", "eyebrow semtit", `Semana ${sem.n}`));
+    app.append(el("div", "eyebrow semtit", tt("corrida_rotina_lbl", { n: sem.n })));
     for (const s of sem.sessoes) {
       const regs = corridasDe(s.id), ok = regs.length > 0;
       const c = el("button", "card corr i-" + s.blocos[0].i, `
-        <div class="letra">${s.dia === "Quarta" ? "QUA" : "DOM"}</div>
+        <div class="letra">${tx(s.dia).slice(0, 3).toUpperCase()}</div>
         <div style="flex:1;min-width:0">
-          <h3>${s.nome}</h3>
-          <p>${s.desc}</p>
+          <h3>${tx(s.nome)}</h3>
+          <p>${tx(s.desc)}</p>
           <div class="chips">
             <span class="chip reps">${s.km} km</span>
-            <span class="chip">${s.tempo} previsto</span>
+            <span class="chip">${s.tempo} ${tt("previsto")}</span>
             <span class="chip alvo">PSE ${s.pse}</span>
           </div>
         </div>
@@ -113,8 +113,8 @@ function telaCorrida() {
   }
 
   const g = el("div", "log guia");
-  g.append(el("div", "eyebrow", "Percepção de esforço"));
-  CORRIDA.pse.forEach(([e, z, d]) => g.append(el("div", "row pse", `<div><b>${z}</b><br><small>${d}</small></div><span class="chip reps">${e}</span>`)));
+  g.append(el("div", "eyebrow", tt("pse_titulo")));
+  CORRIDA.pse.forEach(([e, z, d]) => g.append(el("div", "row pse", `<div><b>${tx(z)}</b><br><small>${tx(d)}</small></div><span class="chip reps">${e}</span>`)));
   app.append(g);
 }
 
@@ -123,41 +123,41 @@ function telaSessao() {
   const s = achaSessao(S.sessao);
   const sub = el("div", "subhead");
   const back = el("button", "back", "←"); back.onclick = () => { S.sessao = null; render(); };
-  sub.append(back, el("div", "", `<div class="eyebrow">${s.dia} · ${s.tipo}</div><h2>${s.nome}</h2>`));
+  sub.append(back, el("div", "", `<div class="eyebrow">${tx(s.dia)} · ${tx(s.tipo)}</div><h2>${tx(s.nome)}</h2>`));
   app.append(sub);
 
   app.append(el("div", "log", `
-    <div class="row"><small>Distância prevista</small><b>${s.km} km</b></div>
-    <div class="row"><small>Tempo de referência</small><b>${s.tempo}</b></div>
-    <div class="row"><small>Esforço alvo</small><b>PSE ${s.pse}</b></div>
-    <div class="row"><small>Pace de referência</small><b>${pace(s.km, paraSeg(s.tempo))} /km</b></div>`));
+    <div class="row"><small>${tt("distancia_prevista")}</small><b>${s.km} km</b></div>
+    <div class="row"><small>${tt("tempo_referencia")}</small><b>${s.tempo}</b></div>
+    <div class="row"><small>${tt("esforco_alvo")}</small><b>PSE ${s.pse}</b></div>
+    <div class="row"><small>${tt("pace_referencia")}</small><b>${pace(s.km, paraSeg(s.tempo))} /km</b></div>`));
 
-  app.append(el("div", "eyebrow semtit", "Estrutura do treino"));
+  app.append(el("div", "eyebrow semtit", tt("estrutura_treino")));
   const lista = el("div", "blocos");
   s.blocos.forEach(b => {
     const info = INT[b.i];
     lista.append(el("div", "bloco", `
       <i style="background:${info.cor}"></i>
-      <div style="flex:1"><b>${b.t}</b><br><small>${info.rot} · ${info.zona}</small></div>
+      <div style="flex:1"><b>${tx(b.t)}</b><br><small>${tx(info.rot)} · ${info.zona}</small></div>
       <span>${b.s ? mmss(b.s) : (b.m >= 1000 ? (b.m / 1000).toFixed(b.m % 1000 ? 1 : 0) + " km" : b.m + " m")}</span>`));
   });
   app.append(lista);
 
-  const go = el("button", "fim", "Iniciar treino guiado");
+  const go = el("button", "fim", tt("iniciar_guiado"));
   go.onclick = () => guiado(s);
   app.append(go);
 
-  const reg = el("button", "linha", "Registrar sem cronômetro");
+  const reg = el("button", "linha", tt("registrar_sem_cron"));
   reg.onclick = () => formRegistro(s);
   app.append(reg);
 
   const regs = corridasDe(s.id);
   if (regs.length) {
-    app.append(el("div", "eyebrow semtit", "Já realizado"));
+    app.append(el("div", "eyebrow semtit", tt("ja_realizado")));
     const log = el("div", "log");
     regs.slice().reverse().forEach(r => {
       const d = new Date(r.ts);
-      log.append(el("div", "row", `<div><b>${r.km} km em ${mmss(r.seg)}</b><br><small>pace ${pace(r.km, r.seg)}/km · PSE ${r.pse}${r.obs ? " · " + r.obs : ""}</small></div>
+      log.append(el("div", "row", `<div><b>${r.km} km ${tt("em_tempo")} ${mmss(r.seg)}</b><br><small>${pace(r.km, r.seg)}/km · PSE ${r.pse}${r.obs ? " · " + r.obs : ""}</small></div>
         <small>${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}</small>`));
     });
     app.append(log);
@@ -174,8 +174,8 @@ function guiado(s) {
   const tela = el("div", "run");
   tela.innerHTML = `
     <div class="run-top">
-      <div class="eyebrow">${s.nome}</div>
-      <div class="run-tot"><span class="tt">0:00</span> total</div>
+      <div class="eyebrow">${tx(s.nome)}</div>
+      <div class="run-tot"><span class="tt">0:00</span> ${tt("total")}</div>
     </div>
     <div class="run-mid">
       <div class="run-int"></div>
@@ -185,9 +185,9 @@ function guiado(s) {
     </div>
     <div class="run-pass"></div>
     <div class="run-ctrl">
-      <button data-pausa>Pausar</button>
-      <button data-pula>Próximo</button>
-      <button data-sai class="perigo">Encerrar</button>
+      <button data-pausa>${tt("pausa")}</button>
+      <button data-pula>${tt("proximo")}</button>
+      <button data-sai class="perigo">${tt("encerrar")}</button>
     </div>`;
   document.body.append(tela);
 
@@ -198,10 +198,10 @@ function guiado(s) {
   function pinta() {
     const b = s.blocos[i], info = INT[b.i];
     tela.style.setProperty("--int", info.cor);
-    tela.querySelector(".run-int").textContent = `${info.rot} · ${info.zona}`;
-    tela.querySelector(".run-b").textContent = b.t;
+    tela.querySelector(".run-int").textContent = `${tx(info.rot)} · ${info.zona}`;
+    tela.querySelector(".run-b").textContent = tx(b.t);
     const prox = s.blocos[i + 1];
-    tela.querySelector(".run-next").textContent = prox ? `Depois: ${prox.t} · ${INT[prox.i].rot}` : "Último bloco";
+    tela.querySelector(".run-next").textContent = prox ? tt("depois", { t: tx(prox.t), r: tx(INT[prox.i].rot) }) : tt("ultimo_bloco");
     tela.querySelector(".run-t").textContent = b.s ? mmss(Math.max(0, b.s - noBloco))
       : (b.m >= 1000 ? (b.m / 1000).toFixed(b.m % 1000 ? 1 : 0) + " km" : b.m + " m");
     tela.querySelector(".run-t").classList.toggle("dist", !b.s);
@@ -218,7 +218,7 @@ function guiado(s) {
     clearInterval(corridaAtiva); corridaAtiva = null;
     try { wake && wake.release(); } catch (e) {}
     tela.remove();
-    if (completo) { vibrar([200, 100, 200, 100, 200]); aviso("Treino concluído!"); }
+    if (completo) { vibrar([200, 100, 200, 100, 200]); aviso(tt("treino_concluido2")); }
     formRegistro(s, completo ? decorrido : null);
   }
 
@@ -236,26 +236,26 @@ function guiado(s) {
   }, 1000);
 
   tela.querySelector("[data-pausa]").onclick = e => {
-    pausado = !pausado; e.target.textContent = pausado ? "Continuar" : "Pausar";
+    pausado = !pausado; e.target.textContent = pausado ? tt("continuar") : tt("pausa");
     tela.classList.toggle("pausado", pausado);
   };
   tela.querySelector("[data-pula]").onclick = avanca;
-  tela.querySelector("[data-sai]").onclick = () => { if (confirm("Encerrar o treino guiado?")) encerra(false); };
+  tela.querySelector("[data-sai]").onclick = () => { if (confirm(tt("confirma_encerrar"))) encerra(false); };
 }
 
 /* ── registro ───────────────────────────────────────────── */
 function formRegistro(s, segundos) {
   const sh = el("div", "sheet");
   const box = el("div", "box", `<div class="grab"></div>
-    <div class="eyebrow">${s.dia} · semana ${CORRIDA.semanas.find(w => w.sessoes.includes(s)).n}</div>
-    <h2 style="margin:4px 0 16px;font-size:21px;letter-spacing:-.03em">Como foi o treino?</h2>`);
+    <div class="eyebrow">${tx(s.dia)} · ${tt("corrida_rotina_lbl", { n: CORRIDA.semanas.find(w => w.sessoes.includes(s)).n })}</div>
+    <h2 style="margin:4px 0 16px;font-size:21px;letter-spacing:-.03em">${tt("como_foi")}</h2>`);
 
   const campos = el("div", "campos", `
-    <label>Distância <span>km</span><input id="f-km" inputmode="decimal" value="${s.km}"></label>
-    <label>Tempo <span>mm:ss</span><input id="f-t" inputmode="numeric" value="${segundos != null ? mmss(segundos) : s.tempo}"></label>`);
+    <label>${tt("distancia_km")} <span>km</span><input id="f-km" inputmode="decimal" value="${s.km}"></label>
+    <label>${tt("tempo_mmss")} <span>mm:ss</span><input id="f-t" inputmode="numeric" value="${segundos != null ? mmss(segundos) : s.tempo}"></label>`);
   box.append(campos);
 
-  const paceBox = el("div", "log", `<div class="row"><small>Pace calculado</small><b class="p">—</b></div>`);
+  const paceBox = el("div", "log", `<div class="row"><small>${tt("pace_calculado")}</small><b class="p">—</b></div>`);
   box.append(paceBox);
   const atualiza = () => {
     const km = parseFloat(String(box.querySelector("#f-km").value).replace(",", "."));
@@ -265,7 +265,7 @@ function formRegistro(s, segundos) {
   box.querySelectorAll("input").forEach(i => { i.oninput = atualiza; });
   atualiza();
 
-  box.append(el("div", "eyebrow", "Percepção de esforço"));
+  box.append(el("div", "eyebrow", tt("pse_esc")));
   let pseSel = s.pse;
   const escala = el("div", "escala");
   for (let n = 1; n <= 10; n++) {
@@ -275,20 +275,20 @@ function formRegistro(s, segundos) {
   }
   box.append(escala);
 
-  const obs = el("textarea", "obs"); obs.placeholder = "Sensações, clima, dores…"; obs.rows = 2;
+  const obs = el("textarea", "obs"); obs.placeholder = tt("observacoes_ph"); obs.rows = 2;
   box.append(obs);
 
-  const salvarBtn = el("button", "fim", "Salvar treino");
+  const salvarBtn = el("button", "fim", tt("salvar_treino"));
   salvarBtn.onclick = () => {
     const km = parseFloat(String(box.querySelector("#f-km").value).replace(",", "."));
     const sg = paraSeg(box.querySelector("#f-t").value);
-    if (!(km > 0) || !sg) { aviso("Confira distância e tempo"); return; }
+    if (!(km > 0) || !sg) { aviso(tt("confira_dados")); return; }
     S.corridas.push({ ts: Date.now(), id: s.id, km, seg: sg, pse: pseSel, obs: obs.value.trim() });
     salvar(); sh.remove(); S.sessao = null; render();
-    aviso(`${km} km registrados · ${pace(km, sg)}/km`);
+    aviso(tt("km_registrados", { km, p: pace(km, sg) }));
   };
   box.append(salvarBtn);
-  const cancela = el("button", "linha", "Agora não");
+  const cancela = el("button", "linha", tt("agora_nao"));
   cancela.onclick = () => sh.remove();
   box.append(cancela);
 
@@ -299,16 +299,16 @@ function formRegistro(s, segundos) {
 
 /* ── bloco de métricas para a aba Progresso ─────────────── */
 function painelCorrida(destino) {
-  destino.append(el("div", "eyebrow semtit", "Corrida"));
-  if (!S.corridas.length) { destino.append(el("p", "vazio", "Nenhuma corrida registrada ainda.")); return; }
+  destino.append(el("div", "eyebrow semtit", tt("nav_corrida")));
+  if (!S.corridas.length) { destino.append(el("p", "vazio", tt("nenhuma_corrida"))); return; }
 
   const km = S.corridas.reduce((n, c) => n + c.km, 0);
   const seg = S.corridas.reduce((n, c) => n + c.seg, 0);
   const melhor = S.corridas.reduce((a, c) => (c.seg / c.km < a.seg / a.km ? c : a));
   destino.append(el("div", "stats", `
-    <div class="stat"><b>${km.toFixed(1)}</b><span>km totais</span></div>
-    <div class="stat"><b>${pace(km, seg)}</b><span>pace médio</span></div>
-    <div class="stat"><b>${pace(melhor.km, melhor.seg)}</b><span>melhor pace</span></div>`));
+    <div class="stat"><b>${km.toFixed(1)}</b><span>${tt("km_totais")}</span></div>
+    <div class="stat"><b>${pace(km, seg)}</b><span>${tt("pace_medio")}</span></div>
+    <div class="stat"><b>${pace(melhor.km, melhor.seg)}</b><span>${tt("melhor_pace")}</span></div>`));
 
   const max = Math.max(...CORRIDA.semanas.map(w => w.sessoes.reduce((n, s) => n + corridasDe(s.id).reduce((k, c) => k + c.km, 0), 0)), 1);
   const barras = el("div", "barras");
@@ -316,12 +316,12 @@ function painelCorrida(destino) {
     const k = w.sessoes.reduce((n, s) => n + corridasDe(s.id).reduce((x, c) => x + c.km, 0), 0);
     barras.append(el("div", "col", `<i style="height:${Math.max(4, k / max * 100)}%"></i><span>S${w.n}</span><small>${k ? k.toFixed(1) : "—"}</small>`));
   });
-  destino.append(el("div", "eyebrow", "Volume por semana do plano"), barras);
+  destino.append(el("div", "eyebrow", tt("volume_semana")), barras);
 
   const log = el("div", "log");
   S.corridas.slice(-6).reverse().forEach(c => {
     const s = achaSessao(c.id), d = new Date(c.ts);
-    log.append(el("div", "row", `<div><b>${s ? s.nome : "Corrida"}</b><br><small>${c.km} km · ${mmss(c.seg)} · ${pace(c.km, c.seg)}/km · PSE ${c.pse}</small></div>
+    log.append(el("div", "row", `<div><b>${s ? tx(s.nome) : tt("nav_corrida")}</b><br><small>${c.km} km · ${mmss(c.seg)} · ${pace(c.km, c.seg)}/km · PSE ${c.pse}</small></div>
       <small>${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}</small>`));
   });
   destino.append(log);

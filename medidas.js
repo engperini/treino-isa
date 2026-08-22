@@ -26,21 +26,21 @@ function migrarMedidas() {
   if (mudou) salvar();
 }
 
-const fmtNum = n => (Math.round(n * 10) / 10).toLocaleString("pt-BR");
+const fmtNum = n => (Math.round(n * 10) / 10).toLocaleString(S.idioma === "en" ? "en-US" : S.idioma === "es" ? "es-ES" : "pt-BR");
 const fmtData = ts => { const d = new Date(ts); return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`; };
 const medidasOrdenadas = () => [...S.medidas].sort((a, b) => a.ts - b.ts);
 
 /* ── tela principal ─────────────────────────────────────── */
 function telaMedidas() {
   app.append(el("header", "top", `
-    <div class="hello"><div class="eyebrow">Acompanhamento pessoal</div><h1>Medidas</h1></div>`));
+    <div class="hello"><div class="eyebrow">${tt("medidas_titulo")}</div><h1>${tt("nav_medidas")}</h1></div>`));
 
-  const registrar = el("button", "fim", "Nova medição");
+  const registrar = el("button", "fim", tt("nova_medicao"));
   registrar.onclick = () => formMedida();
 
   const regs = medidasOrdenadas();
   if (!regs.length) {
-    app.append(el("p", "vazio", "Nenhuma medição registrada ainda.<br>É totalmente opcional — cadastre só se quiser acompanhar sua evolução ao longo do tempo."));
+    app.append(el("p", "vazio", tt("nenhuma_medida")));
     app.append(registrar);
     return;
   }
@@ -48,34 +48,34 @@ function telaMedidas() {
 
   const primeira = regs[0], ultima = regs[regs.length - 1];
   if (regs.length > 1) {
-    app.append(el("div", "eyebrow semtit", `Desde ${fmtData(primeira.ts)}`));
+    app.append(el("div", "eyebrow semtit", tt("desde", { d: fmtData(primeira.ts) })));
     const comp = el("div", "log");
     CAMPOS_MEDIDA.forEach(c => {
       if (primeira[c.k] == null || ultima[c.k] == null) return;
       const dif = ultima[c.k] - primeira[c.k];
       const sinal = dif > 0 ? "+" : "";
       comp.append(el("div", "row", `
-        <div><b>${c.nome}</b><br><small>${fmtNum(primeira[c.k])} → ${fmtNum(ultima[c.k])} ${c.un}</small></div>
-        <span class="chip ${dif === 0 ? "" : "reps"}">${dif === 0 ? "sem mudança" : sinal + fmtNum(dif) + " " + c.un}</span>`));
+        <div><b>${tx(c.nome)}</b><br><small>${fmtNum(primeira[c.k])} → ${fmtNum(ultima[c.k])} ${c.un}</small></div>
+        <span class="chip ${dif === 0 ? "" : "reps"}">${dif === 0 ? tt("sem_mudanca") : sinal + fmtNum(dif) + " " + c.un}</span>`));
     });
     app.append(comp);
   }
 
   const pesos = regs.filter(r => r.peso != null);
   if (pesos.length > 1) {
-    app.append(el("div", "eyebrow semtit", "Peso ao longo do tempo"));
+    app.append(el("div", "eyebrow semtit", tt("peso_tempo")));
     app.append(grafico(pesos.map(r => r.peso), pesos.map(r => fmtData(r.ts))));
   }
 
-  app.append(el("div", "eyebrow semtit", "Histórico"));
+  app.append(el("div", "eyebrow semtit", tt("historico")));
   const log = el("div", "log");
   regs.slice().reverse().forEach(r => {
-    const chips = CAMPOS_MEDIDA.filter(c => r[c.k] != null).map(c => `<span class="chip">${c.nome} ${fmtNum(r[c.k])}${c.un}</span>`).join("");
+    const chips = CAMPOS_MEDIDA.filter(c => r[c.k] != null).map(c => `<span class="chip">${tx(c.nome)} ${fmtNum(r[c.k])}${c.un}</span>`).join("");
     const linha = el("div", "row medida-row", `
       <div style="flex:1"><b>${fmtData(r.ts)}</b><div class="chips" style="margin-top:6px">${chips}</div>${r.obs ? `<p class="dica" style="margin-top:8px">${r.obs}</p>` : ""}</div>
-      <button class="x" title="Excluir">✕</button>`);
+      <button class="x" title="${tt("excluir")}">✕</button>`);
     linha.querySelector(".x").onclick = () => {
-      if (confirm("Excluir esta medição?")) { S.medidas = S.medidas.filter(x => x !== r); salvar(); render(); }
+      if (confirm(tt("excluir_medida_conf"))) { S.medidas = S.medidas.filter(x => x !== r); salvar(); render(); }
     };
     log.append(linha);
   });
@@ -112,40 +112,73 @@ function formMedida() {
   const sh = el("div", "sheet");
   const box = el("div", "box", `<div class="grab"></div>
     <div class="eyebrow">${fmtData(Date.now())}</div>
-    <h2 style="margin:4px 0 16px;font-size:21px;letter-spacing:-.03em">Nova medição</h2>
-    <p class="vazio" style="padding:0 0 14px;text-align:left">Preencha só o que quiser medir hoje. Os campos em branco não entram no registro.</p>`);
+    <h2 style="margin:4px 0 16px;font-size:21px;letter-spacing:-.03em">${tt("nova_medicao")}</h2>`);
+
+  /* nome de quem está usando — personaliza a tela inicial */
+  const nomeBox = el("div", "nome-box");
+  nomeBox.innerHTML = `
+    <div class="eyebrow">${tt("nome_titulo")}</div>
+    <input id="f-nome" class="nome-input" placeholder="${tt("nome_ph")}" value="${S.perfil.nome || ""}">
+    <p class="vazio" style="padding:6px 0 0;text-align:left">${tt("nome_ajuda")}</p>`;
+  box.append(nomeBox);
+
+  let artigoSel = S.perfil.artigo || "de";
+  if (S.idioma === "pt") {
+    const artigoBox = el("div", "");
+    artigoBox.innerHTML = `<div class="eyebrow" style="margin-top:14px">${tt("artigo_lbl")}</div>`;
+    const segArtigo = el("div", "seg");
+    [["da", tt("artigo_curto_a")], ["do", tt("artigo_curto_o")], ["de", tt("artigo_curto_neutro")]].forEach(([v, label]) => {
+      const b = el("button", "", label);
+      b.setAttribute("aria-selected", artigoSel === v);
+      b.onclick = () => {
+        artigoSel = v;
+        [...segArtigo.children].forEach(x => x.setAttribute("aria-selected", "false"));
+        b.setAttribute("aria-selected", "true");
+      };
+      segArtigo.append(b);
+    });
+    artigoBox.append(segArtigo);
+    box.append(artigoBox);
+  }
+  const salvarNome = () => {
+    const nome = box.querySelector("#f-nome").value.trim();
+    S.perfil = { nome, artigo: artigoSel };
+    salvar();
+  };
+  box.querySelector("#f-nome").onchange = salvarNome;
 
   const grid = el("div", "campos grid2");
   CAMPOS_MEDIDA.forEach(c => {
-    grid.append(el("label", "", `${c.nome} <span>${c.un}</span><input data-k="${c.k}" inputmode="decimal" placeholder="—">`));
+    grid.append(el("label", "", `${tx(c.nome)} <span>${c.un}</span><input data-k="${c.k}" inputmode="decimal" placeholder="—">`));
   });
   box.append(grid);
-  const nota = el("p", "vazio", "Braço e coxa são medidos separadamente de cada lado, já que é comum ter uma pequena diferença entre eles.");
+  const nota = el("p", "vazio", tt("nota_lados"));
   nota.style.cssText = "padding:10px 0 4px;text-align:left";
   box.append(nota);
 
-  const obs = el("textarea", "obs"); obs.placeholder = "Observações (opcional)"; obs.rows = 2;
+  const obs = el("textarea", "obs"); obs.placeholder = tt("obs_opcional"); obs.rows = 2;
   box.append(obs);
 
-  const salvarBtn = el("button", "fim", "Salvar medição");
+  const salvarBtn = el("button", "fim", tt("salvar_medicao"));
   salvarBtn.onclick = () => {
+    salvarNome();
     const reg = { ts: Date.now() };
     let algum = false;
     grid.querySelectorAll("input").forEach(i => {
       const v = parseFloat(String(i.value).replace(",", "."));
       if (!isNaN(v) && v > 0) { reg[i.dataset.k] = v; algum = true; }
     });
-    if (!algum) { aviso("Preencha ao menos um campo"); return; }
+    if (!algum) { aviso(tt("preencha_campo")); return; }
     if (obs.value.trim()) reg.obs = obs.value.trim();
     S.medidas.push(reg); salvar(); sh.remove(); render();
-    aviso("Medição registrada");
+    aviso(tt("medicao_registrada"));
   };
   box.append(salvarBtn);
-  const cancela = el("button", "linha", "Agora não");
-  cancela.onclick = () => sh.remove();
+  const cancela = el("button", "linha", tt("agora_nao"));
+  cancela.onclick = () => { salvarNome(); sh.remove(); render(); };
   box.append(cancela);
 
-  sh.onclick = e => { if (e.target === sh) sh.remove(); };
+  sh.onclick = e => { if (e.target === sh) { salvarNome(); sh.remove(); render(); } };
   sh.append(box);
   document.body.append(sh);
 }
