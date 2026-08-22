@@ -1,0 +1,13 @@
+{
+  "name": "Treino da Isa",
+  "short_name": "Treino Isa",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#150E1B",
+  "theme_color": "#150E1B",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "icone.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
