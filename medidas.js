@@ -8,9 +8,23 @@ const CAMPOS_MEDIDA = [
   { k: "cintura", nome: "Cintura", un: "cm" },
   { k: "quadril", nome: "Quadril", un: "cm" },
   { k: "busto", nome: "Busto", un: "cm" },
-  { k: "braco", nome: "Braço", un: "cm" },
-  { k: "coxa", nome: "Coxa", un: "cm" }
+  { k: "braco_dir", nome: "Braço direito", un: "cm" },
+  { k: "braco_esq", nome: "Braço esquerdo", un: "cm" },
+  { k: "coxa_dir", nome: "Coxa direita", un: "cm" },
+  { k: "coxa_esq", nome: "Coxa esquerda", un: "cm" }
 ];
+
+/* Registros antigos guardavam "braco" e "coxa" como medida única.
+   Aqui eles viram o valor inicial de ambos os lados, para não sumir
+   do histórico nem da comparação. Roda uma vez, na carga do app. */
+function migrarMedidas() {
+  let mudou = false;
+  S.medidas.forEach(r => {
+    if (r.braco != null && r.braco_dir == null && r.braco_esq == null) { r.braco_dir = r.braco; r.braco_esq = r.braco; delete r.braco; mudou = true; }
+    if (r.coxa != null && r.coxa_dir == null && r.coxa_esq == null) { r.coxa_dir = r.coxa; r.coxa_esq = r.coxa; delete r.coxa; mudou = true; }
+  });
+  if (mudou) salvar();
+}
 
 const fmtNum = n => (Math.round(n * 10) / 10).toLocaleString("pt-BR");
 const fmtData = ts => { const d = new Date(ts); return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`; };
@@ -106,6 +120,9 @@ function formMedida() {
     grid.append(el("label", "", `${c.nome} <span>${c.un}</span><input data-k="${c.k}" inputmode="decimal" placeholder="—">`));
   });
   box.append(grid);
+  const nota = el("p", "vazio", "Braço e coxa são medidos separadamente de cada lado, já que é comum ter uma pequena diferença entre eles.");
+  nota.style.cssText = "padding:10px 0 4px;text-align:left";
+  box.append(nota);
 
   const obs = el("textarea", "obs"); obs.placeholder = "Observações (opcional)"; obs.rows = 2;
   box.append(obs);

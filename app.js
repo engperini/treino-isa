@@ -28,6 +28,7 @@ const S = {
   medidas: DB.ler("medidas", [])
 };
 const salvar = () => { DB.gravar("sets", S.sets); DB.gravar("pesos", S.pesos); DB.gravar("hist", S.hist); DB.gravar("corridas", S.corridas); DB.gravar("medidas", S.medidas); DB.gravar("plano", S.plano); };
+if (typeof migrarMedidas === "function") migrarMedidas();
 
 /* ── utilidades ─────────────────────────────────────────── */
 const $ = s => document.querySelector(s);
