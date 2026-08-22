@@ -79,8 +79,6 @@ an iPhone.
   of whoever is using the app — from then on, the home screen shows
   "{name}'s Workout" (or the equivalent in the chosen language). It's
   optional; without a name, the app shows a generic title.
-- **Visitor counter** *(optional, off by default)*: see the Privacy section
-  below.
 
 ## For developers
 
@@ -126,7 +124,6 @@ just a quick shortcut for testing or sharing.
 ├── poses.js        # animation engine: SVG poses for each exercise
 ├── corrida.js      # running plan (weeks, blocks, RPE)
 ├── medidas.js      # weight and body measurements (logging, chart, history)
-├── contador.js     # optional visitor counter (GoatCounter, off by default)
 ├── app.js          # app logic, screens, navigation and local storage
 ├── manifest.json   # PWA metadata
 ├── sw.js           # service worker (offline cache)
@@ -164,16 +161,8 @@ the install link on its own within 1–2 minutes.
 
 All progress (checked sets, weights, runs, measurements, history) is saved
 in the browser's `localStorage` — nothing is sent to any server. Backup and
-restore are done manually, via file, in the Settings tab.
-
-**Visitor counter (optional, off by default):** the `contador.js` file can
-show, in the home screen's footer, how many people have used the app —
-using the free, cookieless [GoatCounter](https://www.goatcounter.com)
-service. While the `GOATCOUNTER_SITE` constant is empty, no network call is
-made and nothing shows up. If it's filled in, the app starts sending an
-anonymous signal (no personal data) to GoatCounter every time it's opened
-with internet access — it doesn't work offline, and this is the one
-exception to the "no external dependencies" rule.
+restore are done manually, via file, in the Settings tab. The app never
+makes any network call, under any circumstance.
 
 ## License
 

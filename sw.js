@@ -1,5 +1,5 @@
-const CACHE = "treino-isa-v6";
-const ARQ = ["./", "./index.html", "./app.css", "./i18n.js", "./data.js", "./poses.js", "./corrida.js", "./medidas.js", "./contador.js", "./app.js", "./manifest.json", "./icone.svg"];
+const CACHE = "treino-isa-v7";
+const ARQ = ["./", "./index.html", "./app.css", "./i18n.js", "./data.js", "./poses.js", "./corrida.js", "./medidas.js", "./app.js", "./manifest.json", "./icone.svg"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARQ)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(k => Promise.all(k.filter(x => x !== CACHE).map(x => caches.delete(x)))).then(() => self.clients.claim())); });
 self.addEventListener("fetch", e => {

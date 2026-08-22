@@ -273,6 +273,3 @@ nav button[aria-selected="true"]{background:var(--ink3);color:var(--txt)}
   width:100%;margin-top:8px;background:var(--ink3);border:1px solid var(--line);border-radius:13px;color:var(--txt);
   padding:13px 12px;font-size:16px;font-weight:700;font-family:inherit;-webkit-user-select:text;user-select:text
 }
-
-/* ── contador de visitas (rodapé, opcional) ─────────────── */
-.contador-rodape{margin-top:-6px;opacity:.7;font-size:12px}
