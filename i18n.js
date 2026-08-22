@@ -17,7 +17,7 @@ const IDIOMAS = [
 const UI = {
   pt: {
     nav_forca: "Força", nav_corrida: "Corrida", nav_medidas: "Medidas", nav_progresso: "Progresso", nav_ajustes: "Ajustes",
-    dias_streak: "dias",
+    dias_streak: "dias", contador_usuarios: "👀 {{n}} pessoas já usaram este app",
     saud_manha: "Bom dia", saud_tarde: "Boa tarde", saud_noite: "Boa noite",
     titulo_generico: "Meu Treino", titulo_de: "Treino {{artigo}} {{nome}}",
     academia: "Academia", casa: "Casa",
@@ -77,7 +77,7 @@ const UI = {
 
   en: {
     nav_forca: "Strength", nav_corrida: "Running", nav_medidas: "Measurements", nav_progresso: "Progress", nav_ajustes: "Settings",
-    dias_streak: "days",
+    dias_streak: "days", contador_usuarios: "👀 {{n}} people have used this app",
     saud_manha: "Good morning", saud_tarde: "Good afternoon", saud_noite: "Good evening",
     titulo_generico: "My Workout", titulo_de: "{{nome}}'s Workout",
     academia: "Gym", casa: "Home",
@@ -136,7 +136,7 @@ const UI = {
 
   es: {
     nav_forca: "Fuerza", nav_corrida: "Running", nav_medidas: "Medidas", nav_progresso: "Progreso", nav_ajustes: "Ajustes",
-    dias_streak: "días",
+    dias_streak: "días", contador_usuarios: "👀 {{n}} personas ya han usado esta app",
     saud_manha: "Buenos días", saud_tarde: "Buenas tardes", saud_noite: "Buenas noches",
     titulo_generico: "Mi Entrenamiento", titulo_de: "Entrenamiento de {{nome}}",
     academia: "Gimnasio", casa: "Casa",

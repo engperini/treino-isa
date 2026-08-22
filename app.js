@@ -234,6 +234,9 @@ function telaInicio() {
   }
   app.append(grid);
   app.append(el("p", "vazio", tt("dica_home")));
+  iniciaContadorBeacon();
+  const contadorEl = montaContadorRodape();
+  if (contadorEl) app.append(contadorEl);
 }
 
 function quandoFoi(ts) {

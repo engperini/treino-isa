@@ -69,10 +69,15 @@ para quem usa iPhone vale mais o hábito de usar o backup em **Ajustes**.
 - **Três idiomas**: Português, English e Español, com seletor na aba Ajustes.
   Todo o conteúdo (nomes de exercícios, dicas, plano de corrida) é traduzido,
   não só os menus.
+- **Três idiomas**: Português, English e Español, com seletor na aba Ajustes.
+  Todo o conteúdo (nomes de exercícios, dicas, plano de corrida) é traduzido,
+  não só os menus.
 - **Nome personalizável**: ao cadastrar uma medição, dá para informar o nome
   de quem está usando o app — a partir daí a tela inicial passa a mostrar
   "Treino da/do {nome}" (ou o equivalente no idioma escolhido). É opcional;
   sem nome, o app mostra um título genérico.
+- **Contador de visitas** *(opcional, desligado por padrão)*: veja a seção
+  Privacidade abaixo.
 
 ## Para desenvolvedores
 
@@ -117,6 +122,7 @@ prático para testar ou compartilhar rapidamente.
 ├── poses.js        # motor de animação: poses SVG de cada exercício
 ├── corrida.js      # plano de corrida (semanas, blocos, PSE)
 ├── medidas.js      # peso e medidas corporais (cadastro, gráfico, histórico)
+├── contador.js     # contador de visitas opcional (GoatCounter, desligado por padrão)
 ├── app.js          # lógica do app, telas, navegação e armazenamento local
 ├── manifest.json   # metadados do PWA
 ├── sw.js           # service worker (cache offline)
@@ -155,6 +161,16 @@ o link de instalação sozinho em 1–2 minutos.
 Todo o progresso (séries marcadas, pesos, corridas, medidas, histórico) fica
 salvo no `localStorage` do navegador — nada é enviado para nenhum servidor.
 Backup e restauração são feitos manualmente, por arquivo, na aba Ajustes.
+
+**Contador de visitas (opcional, desligado por padrão):** o arquivo
+`contador.js` pode mostrar, no rodapé da tela inicial, quantas pessoas já
+usaram o app — usando o serviço gratuito e sem cookies
+[GoatCounter](https://www.goatcounter.com). Enquanto a constante
+`GOATCOUNTER_SITE` estiver vazia, nenhuma chamada de rede é feita e nada
+aparece na tela. Se for preenchida, o app passa a enviar um sinal anônimo
+(sem dado pessoal) para o GoatCounter a cada abertura com internet — não
+funciona offline, e essa é a única exceção à regra de "nenhuma dependência
+externa".
 
 ## Licença
 
